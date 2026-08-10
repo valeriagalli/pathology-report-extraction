@@ -3,3 +3,5 @@ llama-index-llms-anthropic
 pydantic
 anthropic
 pandas
+pdfplumber
+pydantic
