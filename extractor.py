@@ -69,8 +69,9 @@ def build_extractor(model_name: str = "openai/gpt-oss-120b", raw_report: str = "
 
 if __name__ == "__main__":
 
+    RESULTS_DIRECT_API_DIR.mkdir(parents=True, exist_ok=True)
+
     reports_df = pd.read_csv(REPORTS_FP)
-    print(reports_df.head())
 
     for _, row in reports_df.sample(n=5, random_state=42).iterrows():
         report_id = row["patient_filename"]
