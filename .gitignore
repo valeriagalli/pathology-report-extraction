@@ -40,4 +40,4 @@ TCGA_Reports.csv.zip
 *.csv
 
 # Extracted json files
-results_directAPI/
+results/

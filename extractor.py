@@ -1,8 +1,8 @@
 import json
 import pandas as pd
 from groq import Groq
-from pathlib import Path
 
+from config import REPORTS_FP, RESULTS_DIRECT_API_DIR
 from schema import PathologyExtraction
 
 
@@ -32,12 +32,7 @@ For each field:
 Return the result according to the provided extraction schema.
 
 """
-ROOT_DIR = Path().resolve()
-DATA_DIR = ROOT_DIR / "dataset"
-RESULT_API_DIR = ROOT_DIR / "results_directAPI"
-RESULT_API_DIR.mkdir(exist_ok=True)
 
-REPORTS_FP = DATA_DIR / "TCGA_Reports.csv"
 
 client = Groq()
 
@@ -80,7 +75,7 @@ if __name__ == "__main__":
     for _, row in reports_df.sample(n=5, random_state=42).iterrows():
         report_id = row["patient_filename"]
         report_text = row["text"]
-        id_result_fp = RESULT_API_DIR / f"{report_id}.json"
+        id_result_fp = RESULTS_DIRECT_API_DIR / f"{report_id}.json"
         try:
             extracted = build_extractor("openai/gpt-oss-120b", report_text)
         except Exception as e:
