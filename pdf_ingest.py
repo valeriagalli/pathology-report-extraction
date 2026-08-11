@@ -42,5 +42,6 @@ if __name__ == "__main__":
     print(f"\n{len(succeeded)}/{len(files)} succeeded.")
     print("Succeeded:", succeeded)
     print("Failed:")
+    
     for name, reason in failed:
         print(f"  - {name}: {reason}")
