@@ -5,23 +5,37 @@ from pathlib import Path
 import pdfplumber
 
 test_fixtures_dir = Path("./test_fixtures")
-MIN_CHARS = 50 
+MIN_CHARS = 50
 
-def extract_text_from_pdf(fp):
-   pages = []
 
-   with pdfplumber.open(fp) as pdf:
-    for page in pdf.pages:
-        text = page.extract_text(layout=True) 
-        if text is not None:
-           pages.append(text)
+def extract_text_from_pdf(fp: Path) -> str:
+    """Extract text from a PDF file.
+
+    Args:
+        fp: Path or string path to a PDF file.
+
+    Returns:
+        The extracted text.
+
+    Raises:
+        ValueError: If extracted text is shorter than `MIN_CHARS` (likely scanned).
+    """
+    pages = []
+
+    with pdfplumber.open(fp) as pdf:
+        for page in pdf.pages:
+            text = page.extract_text(layout=True)
+            if text is not None:
+                pages.append(text)
 
     full_text = "\n".join(pages).strip()
 
     if len(full_text) < MIN_CHARS:
-       raise ValueError(f"{fp} returned less than {MIN_CHARS} characters."
-                 "Empty PDF or scanned, no text detected.")
-    
+        raise ValueError(
+            f"{fp} returned less than {MIN_CHARS} characters."
+            "Empty PDF or scanned, no text detected."
+        )
+
     return full_text
 
 
@@ -42,6 +56,6 @@ if __name__ == "__main__":
     print(f"\n{len(succeeded)}/{len(files)} succeeded.")
     print("Succeeded:", succeeded)
     print("Failed:")
-    
+
     for name, reason in failed:
         print(f"  - {name}: {reason}")

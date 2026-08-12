@@ -4,23 +4,41 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class ExtractedField(BaseModel):
+    """Container for a single extracted value and its evidence."""
     model_config = ConfigDict(extra="forbid")
-    value: str | None 
-    evidence: str | None 
+    value: str | None
+    evidence: str | None
 
 
 class PathologyExtraction(BaseModel):
+    """Top-level schema for extracted pathology fields.
+
+    Each attribute is an `ExtractedField` containing the extracted value
+    and supporting evidence from the report.
+    """
     model_config = ConfigDict(extra="forbid")
-    diagnosis: ExtractedField = Field(description="Primary diagnosis, e.g. 'Renal cell carcinoma, clear cell type'")
-    tumor_site: ExtractedField = Field(description="Anatomical site/organ of the tumor, e.g. 'Kidney, left upper pole'")
-    grade: ExtractedField = Field(description="Tumor grade, e.g. 'Fuhrman Nuclear Grade II/IV' or 'Gleason 7 (3+4)'")
-    stage: ExtractedField = Field(description="Pathological stage, e.g. 'pT1' or 'pT2N0M0', TNM notation if present")
-    margins: ExtractedField = Field(description="Surgical margin status, e.g. 'Free of tumor' or 'Positive'")
+    diagnosis: ExtractedField = Field(
+        description="Primary diagnosis, e.g. 'Renal cell carcinoma, clear cell type'"
+    )
+    tumor_site: ExtractedField = Field(
+        description="Anatomical site/organ of the tumor, e.g. 'Kidney, left upper pole'"
+    )
+    grade: ExtractedField = Field(
+        description="Tumor grade, e.g. 'Fuhrman Nuclear Grade II/IV' or 'Gleason 7 (3+4)'"
+    )
+    stage: ExtractedField = Field(
+        description="Pathological stage, e.g. 'pT1' or 'pT2N0M0', TNM notation if present"
+    )
+    margins: ExtractedField = Field(
+        description="Surgical margin status, e.g. 'Free of tumor' or 'Positive'"
+    )
 
 
 if __name__ == "__main__":
     dummy_extraction = PathologyExtraction(
-        diagnosis=ExtractedField(value="Renal cell carcinoma, clear cell type", evidence="..."),
+        diagnosis=ExtractedField(
+            value="Renal cell carcinoma, clear cell type", evidence="..."
+        ),
         tumor_site=ExtractedField(value="Kidney, left upper pole", evidence="..."),
         grade=ExtractedField(value=None, evidence=None),
         stage=ExtractedField(value=None, evidence=None),

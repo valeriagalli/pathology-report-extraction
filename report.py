@@ -10,12 +10,24 @@ MIN_TEXT_LEN = 10
 MAX_SEGMENT_LEN = 200
 
 
-def flag_short_report(report_id, report_text: str):
+def flag_short_report(report_id: str, report_text: str) -> None:
+    """Print a warning if a report's text is unusually short.
+
+    Args:
+        report_id: Identifier for the report (e.g., filename).
+        report_text: Raw report text to check.
+    """
     if len(report_text.strip()) < MIN_TEXT_LEN:
-        print(f"WARNING: unusually short report {report_id}: text length = {len(report_text)}")
+        print(
+            f"WARNING: unusually short report {report_id}: text length = {len(report_text)}"
+        )
 
 
-def detect_text_units(text: str):
+def detect_text_units(text: str) -> list[str]:
+    """Split text into sentence-like units based on periods.
+
+    Returns a list of trimmed units (omits empty results).
+    """
     return [unit.strip() for unit in re.split(r"\.\s+", text) if unit.strip()]
 
 
@@ -31,7 +43,16 @@ def normalize_string(text: str) -> str:
     return clean_whitespace(text).casefold()
 
 
-def segment_text(text: str, max_length: int = MAX_SEGMENT_LEN):
+def segment_text(text: str, max_length: int = MAX_SEGMENT_LEN) -> list[str]:
+    """Group sentence-like units into segments no longer than `max_length`.
+
+    Args:
+        text: Input text to segment.
+        max_length: Maximum characters per segment.
+
+    Returns:
+        A list of text segments.
+    """
     text_units = detect_text_units(text)
     segments = []
     current = ""

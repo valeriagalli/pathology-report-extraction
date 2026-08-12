@@ -1,3 +1,5 @@
+"""Build and run a structured extractor over pathology report text."""
+
 import json
 
 import pandas as pd
@@ -36,19 +38,28 @@ Return the result according to the provided extraction schema.
 
 client = Groq()
 
-def build_extractor(model_name: str = "openai/gpt-oss-120b", raw_report: str = "") -> PathologyExtraction:
+
+def build_extractor(
+    model_name: str = "openai/gpt-oss-120b", raw_report: str = ""
+) -> PathologyExtraction:
+    """Query the LLM to extract structured pathology information.
+
+    Args:
+        model_name: Model identifier passed to the Groq client.
+        raw_report: The raw report text to extract from.
+
+    Returns:
+        A validated `PathologyExtraction` instance.
+    """
 
     completion = client.chat.completions.create(
         model=model_name,
         messages=[
             {
-                "role": "system", 
+                "role": "system",
                 "content": PROMPT_TEMPLATE,
             },
-            {
-                "role": "user", 
-                "content": f"Pathology report text:\n{raw_report}"
-            }
+            {"role": "user", "content": f"Pathology report text:\n{raw_report}"},
         ],
         response_format={
             "type": "json_schema",
@@ -58,7 +69,7 @@ def build_extractor(model_name: str = "openai/gpt-oss-120b", raw_report: str = "
                 "schema": PathologyExtraction.model_json_schema(),
             },
         },
-        temperature = 0,
+        temperature=0,
     )
 
     extracted = completion.choices[0].message.content
@@ -68,7 +79,6 @@ def build_extractor(model_name: str = "openai/gpt-oss-120b", raw_report: str = "
 
 
 if __name__ == "__main__":
-
     RESULTS_DIRECT_API_DIR.mkdir(parents=True, exist_ok=True)
 
     reports_df = pd.read_csv(REPORTS_FP)
@@ -81,10 +91,7 @@ if __name__ == "__main__":
         try:
             extracted = build_extractor("openai/gpt-oss-120b", report_text)
         except Exception as e:
-            print(f"FAILED {id}: {e}")
+            print(f"FAILED {report_id}: {e}")
         with open(id_result_fp, "w") as res_fp:
             json.dump(extracted.model_dump(), res_fp, indent=2)
         print(f"Saved extracted data for {report_id}")
-         
-
-   
