@@ -35,6 +35,7 @@ htmlcov/
 Thumbs.db
 
 # Data files (large, fetched separately, see README)
+datasets/
 TCGA_Reports.csv
 TCGA_Reports.csv.zip
 *.csv
