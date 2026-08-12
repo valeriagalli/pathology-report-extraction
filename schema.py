@@ -5,6 +5,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 class ExtractedField(BaseModel):
     """Container for a single extracted value and its evidence."""
+
     model_config = ConfigDict(extra="forbid")
     value: str | None
     evidence: str | None
@@ -16,6 +17,7 @@ class PathologyExtraction(BaseModel):
     Each attribute is an `ExtractedField` containing the extracted value
     and supporting evidence from the report.
     """
+
     model_config = ConfigDict(extra="forbid")
     diagnosis: ExtractedField = Field(
         description="Primary diagnosis, e.g. 'Renal cell carcinoma, clear cell type'"

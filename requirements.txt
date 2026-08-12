@@ -1,5 +1,5 @@
 groq
-pydantic
 pandas
 pdfplumber
 pydantic
+sentence_transformers

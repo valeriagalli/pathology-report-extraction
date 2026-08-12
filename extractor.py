@@ -5,7 +5,7 @@ import json
 import pandas as pd
 from groq import Groq
 
-from config import REPORTS_FP, RESULTS_DIRECT_API_DIR
+from config import DIRECT_API_EXTRACTIONS_DIR, DIRECT_API_MODEL_NAME, REPORTS_FP
 from schema import PathologyExtraction
 
 PROMPT_TEMPLATE = """
@@ -40,7 +40,7 @@ client = Groq()
 
 
 def build_extractor(
-    model_name: str = "openai/gpt-oss-120b", raw_report: str = ""
+    model_name: str = DIRECT_API_MODEL_NAME, raw_report: str = ""
 ) -> PathologyExtraction:
     """Query the LLM to extract structured pathology information.
 
@@ -79,7 +79,7 @@ def build_extractor(
 
 
 if __name__ == "__main__":
-    RESULTS_DIRECT_API_DIR.mkdir(parents=True, exist_ok=True)
+    DIRECT_API_EXTRACTIONS_DIR.mkdir(parents=True, exist_ok=True)
 
     reports_df = pd.read_csv(REPORTS_FP)
 
@@ -87,7 +87,7 @@ if __name__ == "__main__":
         report_id = row["patient_filename"]
         report_text = row["text"]
 
-        id_result_fp = RESULTS_DIRECT_API_DIR / f"{report_id}.json"
+        id_result_fp = DIRECT_API_EXTRACTIONS_DIR / f"{report_id}.json"
         try:
             extracted = build_extractor("openai/gpt-oss-120b", report_text)
         except Exception as e:
