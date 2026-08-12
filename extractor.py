@@ -2,10 +2,12 @@
 
 import json
 
-import pandas as pd
 from groq import Groq
 
-from config import DIRECT_API_EXTRACTIONS_DIR, DIRECT_API_MODEL_NAME, REPORTS_FP
+from config import (
+    DIRECT_API_EXTRACTIONS_DIR,
+    DIRECT_API_MODEL_NAME,
+)
 from schema import PathologyExtraction
 
 PROMPT_TEMPLATE = """
@@ -78,12 +80,14 @@ def build_extractor(
     return result
 
 
-if __name__ == "__main__":
-    DIRECT_API_EXTRACTIONS_DIR.mkdir(parents=True, exist_ok=True)
-
-    reports_df = pd.read_csv(REPORTS_FP)
-
-    for _, row in reports_df.sample(n=5, random_state=42).iterrows():
+def run_extraction(reports_df_all, subset=None) -> list[str]:
+    failed_extractions = []
+    extraction_files = []
+    if subset:
+        reports_df = reports_df_all.sample(n=subset, random_state=42)
+    else:
+        reports_df = reports_df_all
+    for _, row in reports_df.iterrows():
         report_id = row["patient_filename"]
         report_text = row["text"]
 
@@ -92,6 +96,11 @@ if __name__ == "__main__":
             extracted = build_extractor("openai/gpt-oss-120b", report_text)
         except Exception as e:
             print(f"FAILED {report_id}: {e}")
+            failed_extractions.append(report_id)
+            continue
         with open(id_result_fp, "w") as res_fp:
             json.dump(extracted.model_dump(), res_fp, indent=2)
+        extraction_files.append(id_result_fp)
         print(f"Saved extracted data for {report_id}")
+
+    return extraction_files, failed_extractions

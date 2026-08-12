@@ -76,7 +76,7 @@ pathology-report-extraction/
 - [x] PDF text ingestion
 - [x] Extraction schema
 - [x] LLM extraction agent (direct Groq API)
-- [ ] Grounding-based confidence scoring
+- [x] Grounding-based confidence scoring
 - [ ] End-to-end pipeline over TCGA-Reports dataset
 
 

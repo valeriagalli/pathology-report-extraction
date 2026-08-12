@@ -6,7 +6,7 @@ from pathlib import Path
 import pandas as pd
 from sentence_transformers import SentenceTransformer, util
 
-from config import DIRECT_API_EXTRACTIONS_DIR, DIRECT_API_VALIDATION_DIR, REPORTS_FP
+from config import DIRECT_API_VALIDATION_DIR
 from report import detect_text_units, normalize_string
 from schema import PathologyExtraction
 
@@ -171,9 +171,7 @@ def validate_extraction_completeness(
     )
 
     field_completeness = fields_with_value / expected_fields
-    evidence_coverage = (
-        fields_with_evidence / fields_with_value if fields_with_value else 0.0
-    )
+    evidence_coverage = fields_with_evidence / expected_fields
 
     return field_completeness, evidence_coverage
 
@@ -197,6 +195,7 @@ def validate_extraction(
     report_raw_clean = normalize_string(report_raw)
     for field_name in PathologyExtraction.model_fields:
         extracted_field = getattr(report_extracted, field_name)
+
         if extracted_field.value is None or extracted_field.evidence is None:
             continue
 
@@ -240,16 +239,9 @@ def validate_extraction(
     return validation_result, field_results
 
 
-if __name__ == "__main__":
-    DIRECT_API_VALIDATION_DIR.mkdir(parents=True, exist_ok=True)
-
-    results_files = list(DIRECT_API_EXTRACTIONS_DIR.glob("*.json"))
-
-    reports_raw_df = pd.read_csv(REPORTS_FP)
-
+def run_confidence_validation(extraction_files, reports_raw_df):
     validation_results = []
-
-    for file in results_files:
+    for file in extraction_files:
         report_id = file.stem
         print(f"\n========== Validating\t{report_id} ========== ")
 
