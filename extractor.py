@@ -1,10 +1,10 @@
 import json
+
 import pandas as pd
 from groq import Groq
 
 from config import REPORTS_FP, RESULTS_DIRECT_API_DIR
 from schema import PathologyExtraction
-
 
 PROMPT_TEMPLATE = """
 You are extracting structured clinical information from pathology reports.
@@ -36,7 +36,7 @@ Return the result according to the provided extraction schema.
 
 client = Groq()
 
-def build_extractor(model_name: str = "openai/gpt-oss-120b", raw_report: str = ""):
+def build_extractor(model_name: str = "openai/gpt-oss-120b", raw_report: str = "") -> PathologyExtraction:
 
     completion = client.chat.completions.create(
         model=model_name,
@@ -76,6 +76,7 @@ if __name__ == "__main__":
     for _, row in reports_df.sample(n=5, random_state=42).iterrows():
         report_id = row["patient_filename"]
         report_text = row["text"]
+
         id_result_fp = RESULTS_DIRECT_API_DIR / f"{report_id}.json"
         try:
             extracted = build_extractor("openai/gpt-oss-120b", report_text)

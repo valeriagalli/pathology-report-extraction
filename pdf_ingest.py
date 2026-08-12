@@ -1,8 +1,8 @@
 """PDF ingestion: extract text from a text-based PDF pathology report."""
 
 from pathlib import Path
-import pdfplumber
 
+import pdfplumber
 
 test_fixtures_dir = Path("./test_fixtures")
 MIN_CHARS = 50 

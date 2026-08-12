@@ -10,3 +10,4 @@ RESULTS_DIRECT_API_DIR = RESULTS_DIR / "directAPI"
 RESUTLS_LLAMA_DIR = RESULTS_DIR / "llamaindex"
 
 MODEL_NAME = "openai/gpt-oss-120b"
+
