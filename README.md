@@ -50,11 +50,12 @@ pathology-report-extraction/
 ├── results/
 │   └── directAPI/                    # gitignored, generated outputs
 │       ├── extractions/
-│       │   ├── <patient_id>.json
+│       │   ├── failed_extractions.csv
+│       │   └── <patient_id>.json
 │       │   └── ...
 │       └── validation/
 │           ├── validation_overview.csv
-│           ├── <patient_id>_field_results.csv
+│           ├── field_results.csv
 │           └── ...
 ├── test_fixtures/
 │   ├── test_report.pdf
@@ -77,6 +78,7 @@ pathology-report-extraction/
 - [x] Extraction schema
 - [x] LLM extraction agent (direct Groq API)
 - [x] Grounding-based confidence scoring
+- [ ] Review queue
 - [ ] End-to-end pipeline over TCGA-Reports dataset
 
 

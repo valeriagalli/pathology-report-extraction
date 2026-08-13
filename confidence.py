@@ -6,7 +6,6 @@ from pathlib import Path
 import pandas as pd
 from sentence_transformers import SentenceTransformer, util
 
-from config import DIRECT_API_VALIDATION_DIR
 from report import detect_text_units, normalize_string
 from schema import PathologyExtraction
 
@@ -178,18 +177,18 @@ def validate_extraction_completeness(
 
 def validate_extraction(
     report_id: str, report_raw: str, report_extracted: PathologyExtraction
-) -> tuple[dict, dict]:
-    """Validate the extracted report and return summary and per-field results."""
+) -> tuple[dict, list[dict]]:
+    """Validate the extracted report and return summary metrics and per-field results."""
 
     # Validate extraction completeness (field completeness and evidence coverage)
-    field_completeness, evidence_coverage = validate_extraction_completeness(
+    field_coverage, evidence_coverage = validate_extraction_completeness(
         report_extracted
     )
 
     value_evidence_matches = []
     evidence_report_matches = []
 
-    field_results = {}
+    field_results_list = []
 
     # For each field validate value-evidence consistency and evidence-report grounding
     report_raw_clean = normalize_string(report_raw)
@@ -200,24 +199,27 @@ def validate_extraction(
             continue
 
         field_result = validate_field(field_name, extracted_field, report_raw_clean)
-        field_results[field_name] = field_result
+        record = {
+            "report_id": report_id,
+            "field_name": field_name,
+            **field_result,
+        }
+        field_results_list.append(record)
+
         if field_result["value_evidence_pass"]:
             value_evidence_matches.append(field_name)
         if field_result["evidence_grounding_pass"]:
             evidence_report_matches.append(field_name)
 
-    # Report a score for value-evidence consistency and evidence-report grounding
-    fields_with_value_and_evidence = sum(
-        getattr(report_extracted, field_name).value is not None
-        and getattr(report_extracted, field_name).evidence is not None
-        for field_name in PathologyExtraction.model_fields
-    )
+    # Calculate ratios based on populated fields
+    fields_with_value_and_evidence = len(field_results_list)
+
+    # Report a score for value-evidence consistency evidence-report grounding
     value_evidence_consistency = (
         len(value_evidence_matches) / fields_with_value_and_evidence
         if fields_with_value_and_evidence
         else 0.0
     )
-
     evidence_report_grounding = (
         len(evidence_report_matches) / fields_with_value_and_evidence
         if fields_with_value_and_evidence
@@ -225,22 +227,24 @@ def validate_extraction(
     )
 
     validation_result = {
-        "Report ID": report_id,
-        "Field Completeness": field_completeness,
-        "Evidence Coverage": evidence_coverage,
-        "Value-Evidence Consistency": value_evidence_consistency,
-        "Evidence-Report Grounding": evidence_report_grounding,
+        "report_id": report_id,
+        "field_coverage": field_coverage,
+        "evidence_coverage": evidence_coverage,
+        "value_evidence_consistency": value_evidence_consistency,
+        "evidence_report_grounding": evidence_report_grounding,
     }
 
     print("\nValidation results overview")
     for key, item in validation_result.items():
         print(f"{key}\t{item}")
 
-    return validation_result, field_results
+    return validation_result, field_results_list
 
 
 def run_confidence_validation(extraction_files, reports_raw_df):
     validation_results = []
+    all_field_results = []
+
     for file in extraction_files:
         report_id = file.stem
         print(f"\n========== Validating\t{report_id} ========== ")
@@ -250,18 +254,15 @@ def run_confidence_validation(extraction_files, reports_raw_df):
         report_extracted = load_and_validate_result(file)
 
         if report_raw is not None and report_extracted is not None:
-            validation_result, field_results = validate_extraction(
+            validation_result, field_results_list = validate_extraction(
                 report_id, report_raw, report_extracted
             )
 
             validation_results.append(validation_result)
 
-            field_results_df = pd.DataFrame(field_results)
-            field_results_df.to_csv(
-                DIRECT_API_VALIDATION_DIR / f"{report_id}_field_results.csv"
-            )
+            all_field_results.extend(field_results_list)
 
     validation_overview = pd.DataFrame(validation_results)
-    validation_overview.to_csv(
-        DIRECT_API_VALIDATION_DIR / "validation_overview.csv", index=False
-    )
+    field_results_df  = pd.DataFrame(all_field_results)
+
+    return validation_overview, field_results_df

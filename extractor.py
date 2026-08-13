@@ -4,11 +4,8 @@ import json
 
 from groq import Groq
 
-from config import (
-    DIRECT_API_EXTRACTIONS_DIR,
-    DIRECT_API_MODEL_NAME,
-)
 from schema import PathologyExtraction
+
 
 PROMPT_TEMPLATE = """
 You are extracting structured clinical information from pathology reports.
@@ -33,7 +30,7 @@ For each field:
 - Preserve the meaning and terminology of the original report.
 - Do not use external knowledge to fill missing information.
 
-Return the result according to the provided extraction schema.
+Return the result as valid JSON according to the provided extraction schema.
 
 """
 
@@ -42,7 +39,7 @@ client = Groq()
 
 
 def build_extractor(
-    model_name: str = DIRECT_API_MODEL_NAME, raw_report: str = ""
+    model_name: str, response_format: dict, raw_report: str = ""
 ) -> PathologyExtraction:
     """Query the LLM to extract structured pathology information.
 
@@ -63,14 +60,7 @@ def build_extractor(
             },
             {"role": "user", "content": f"Pathology report text:\n{raw_report}"},
         ],
-        response_format={
-            "type": "json_schema",
-            "json_schema": {
-                "name": "pathology_extraction",
-                "strict": True,
-                "schema": PathologyExtraction.model_json_schema(),
-            },
-        },
+        response_format=response_format,
         temperature=0,
     )
 
@@ -80,7 +70,9 @@ def build_extractor(
     return result
 
 
-def run_extraction(reports_df_all, subset=None) -> list[str]:
+def run_extraction(
+    reports_df_all, subset, model_name, response_format, output_dir
+) -> tuple[list[str], dict]:
     failed_extractions = []
     extraction_files = []
     if subset:
@@ -91,12 +83,12 @@ def run_extraction(reports_df_all, subset=None) -> list[str]:
         report_id = row["patient_filename"]
         report_text = row["text"]
 
-        id_result_fp = DIRECT_API_EXTRACTIONS_DIR / f"{report_id}.json"
+        id_result_fp = output_dir / f"{report_id}.json"
         try:
-            extracted = build_extractor("openai/gpt-oss-120b", report_text)
+            extracted = build_extractor(model_name, response_format, report_text)
         except Exception as e:
             print(f"FAILED {report_id}: {e}")
-            failed_extractions.append(report_id)
+            failed_extractions.append({"report_id": report_id, "error": str(e)})
             continue
         with open(id_result_fp, "w") as res_fp:
             json.dump(extracted.model_dump(), res_fp, indent=2)

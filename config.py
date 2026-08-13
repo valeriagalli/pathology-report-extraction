@@ -2,15 +2,26 @@
 
 from pathlib import Path
 
+from schema import PathologyExtraction
+
 ROOT_DIR = Path(__file__).resolve().parent
 DATA_DIR = ROOT_DIR / "dataset"
 REPORTS_FP = DATA_DIR / "TCGA_Reports.csv"
 RESULTS_DIR = ROOT_DIR / "results"
 
-DIRECT_API_DIR = RESULTS_DIR / "direct_api"
-DIRECT_API_EXTRACTIONS_DIR = DIRECT_API_DIR / "extractions"
-DIRECT_API_VALIDATION_DIR = DIRECT_API_DIR / "validation"
+GPT_OSS_DIR = RESULTS_DIR / "GPT_OSS"
+GPT_OSS_EXTRACTIONS_DIR = GPT_OSS_DIR / "extractions"
+GPT_OSS_VALIDATION_DIR = GPT_OSS_DIR / "validation"
 
-DIRECT_API_MODEL_NAME = "openai/gpt-oss-120b"
+GPT_OSS_MODEL_NAME = "openai/gpt-oss-120b"
 
-RAND_SUBSET = 20
+RESPONSE_FORMAT = {
+    "type": "json_schema",
+    "json_schema": {
+        "name": "pathology_extraction",
+        "strict": True,
+        "schema": PathologyExtraction.model_json_schema(),
+    },
+}
+
+RAND_SUBSET = 50
