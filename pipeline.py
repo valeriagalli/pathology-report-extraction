@@ -30,7 +30,9 @@ def main():
 
     print(f"\nGPT-OSS failed: {len(failed_extractions)} / {RAND_SUBSET}")
     if failed_extractions:
-        pd.DataFrame(failed_extractions).to_csv(GPT_OSS_EXTRACTIONS_DIR / "failed_extractions.csv", index=False)
+        pd.DataFrame(failed_extractions).to_csv(
+            GPT_OSS_EXTRACTIONS_DIR / "failed_extractions.csv", index=False
+        )
 
     extraction_files = GPT_OSS_EXTRACTIONS_DIR.glob("*.json")
 
@@ -38,8 +40,14 @@ def main():
         extraction_files,
         reports_df,
     )
-    validation_overview.to_csv(GPT_OSS_VALIDATION_DIR / "validation_overview.csv", float_format="%.2f", index=False)
-    field_results_df.to_csv(GPT_OSS_VALIDATION_DIR / "field_results.csv", float_format="%.2f", index=False)
+    validation_overview.to_csv(
+        GPT_OSS_VALIDATION_DIR / "validation_overview.csv",
+        float_format="%.2f",
+        index=False,
+    )
+    field_results_df.to_csv(
+        GPT_OSS_VALIDATION_DIR / "field_results.csv", float_format="%.2f", index=False
+    )
 
 
 if __name__ == "__main__":

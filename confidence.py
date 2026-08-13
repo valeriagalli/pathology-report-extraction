@@ -63,6 +63,17 @@ def combine_adjacent_units(selected_index: int, text_units: list[str]) -> list[s
 
 
 def validate_field_value(value: str, evidence: str) -> tuple[float | None, bool]:
+    """Validate that the extracted value is consistent with the evidence.
+
+    Args:
+        value: The extracted field value.
+        evidence: The supporting evidence text for the value.
+
+    Returns:
+        A tuple of (similarity_score, passed) where similarity_score is the
+        semantic similarity between value and evidence (None if direct match),
+        and passed is True if validation succeeded.
+    """
     if value in evidence:
         print("Value-evidence consistency:\tDIRECT MATCH\t✅ PASS")
         passed = True
@@ -92,6 +103,17 @@ def validate_field_value(value: str, evidence: str) -> tuple[float | None, bool]
 def validate_field_evidence(
     evidence: str, report_raw_clean: str
 ) -> tuple[float, float | None, bool]:
+    """Validate that the evidence text is grounded in the raw report.
+
+    Args:
+        evidence: The supporting evidence text.
+        report_raw_clean: The cleaned raw report text.
+
+    Returns:
+        A tuple of (lexical_score, semantic_score, passed) where lexical_score
+        is the sequence matching ratio, semantic_score is the embedding similarity
+        (None if direct match), and passed is True if validation succeeded.
+    """
     evidence_embedded = embed_string(evidence)
 
     text_units = detect_text_units(report_raw_clean)
@@ -158,6 +180,16 @@ def validate_field(
 def validate_extraction_completeness(
     report_extracted: PathologyExtraction,
 ) -> tuple[float, float]:
+    """Calculate field completeness and evidence coverage metrics.
+
+    Args:
+        report_extracted: The extracted pathology report object.
+
+    Returns:
+        A tuple of (field_completeness, evidence_coverage) where field_completeness
+        is the ratio of fields with values and evidence_coverage is the ratio of
+        fields with evidence.
+    """
     expected_fields = len(report_extracted.model_dump().values())
     fields_with_value = sum(
         getattr(report_extracted, field_name).value is not None
@@ -177,8 +209,19 @@ def validate_extraction_completeness(
 
 def validate_extraction(
     report_id: str, report_raw: str, report_extracted: PathologyExtraction
-) -> tuple[dict, list[dict]]:
-    """Validate the extracted report and return summary metrics and per-field results."""
+) -> tuple[dict[str, float | str], list[dict[str, float | bool | str | None]]]:
+    """Validate the extracted report and return summary metrics and per-field results.
+
+    Args:
+        report_id: Unique identifier for the report.
+        report_raw: The raw report text.
+        report_extracted: The extracted pathology report object.
+
+    Returns:
+        A tuple of (validation_result, field_results) where validation_result
+        contains summary metrics (field_coverage, evidence_coverage, value_evidence_consistency,
+        evidence_report_grounding) and field_results is a list of per-field metrics.
+    """
 
     # Validate extraction completeness (field completeness and evidence coverage)
     field_coverage, evidence_coverage = validate_extraction_completeness(
@@ -241,7 +284,21 @@ def validate_extraction(
     return validation_result, field_results_list
 
 
-def run_confidence_validation(extraction_files, reports_raw_df):
+def run_confidence_validation(
+    extraction_files: list[Path], reports_raw_df: pd.DataFrame
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Run confidence validation pipeline on extracted reports.
+
+    Args:
+        extraction_files: List of Path objects to extracted JSON files.
+        reports_raw_df: DataFrame containing raw report texts with 'patient_filename'
+            and 'text' columns.
+
+    Returns:
+        A tuple of (validation_overview, field_results) where validation_overview
+        is a DataFrame of summary metrics per report and field_results is a
+        DataFrame of per-field validation results.
+    """
     validation_results = []
     all_field_results = []
 
@@ -263,6 +320,6 @@ def run_confidence_validation(extraction_files, reports_raw_df):
             all_field_results.extend(field_results_list)
 
     validation_overview = pd.DataFrame(validation_results)
-    field_results_df  = pd.DataFrame(all_field_results)
+    field_results = pd.DataFrame(all_field_results)
 
-    return validation_overview, field_results_df
+    return validation_overview, field_results

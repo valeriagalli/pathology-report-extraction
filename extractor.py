@@ -1,11 +1,12 @@
 """Build and run a structured extractor over pathology report text."""
 
 import json
+from pathlib import Path
 
+import pandas as pd
 from groq import Groq
 
 from schema import PathologyExtraction
-
 
 PROMPT_TEMPLATE = """
 You are extracting structured clinical information from pathology reports.
@@ -45,6 +46,7 @@ def build_extractor(
 
     Args:
         model_name: Model identifier passed to the Groq client.
+        response_format: Groq API response format specification (e.g., JSON schema).
         raw_report: The raw report text to extract from.
 
     Returns:
@@ -71,8 +73,27 @@ def build_extractor(
 
 
 def run_extraction(
-    reports_df_all, subset, model_name, response_format, output_dir
-) -> tuple[list[str], dict]:
+    reports_df_all: pd.DataFrame,
+    subset: int | None,
+    model_name: str,
+    response_format: dict,
+    output_dir: Path,
+) -> tuple[list[Path], list[dict[str, str]]]:
+    """Run field extraction from raw report text pipeline.
+
+    Args:
+        reports_df_all: DataFrame containing raw reports with 'patient_filename'
+            and 'text' columns.
+        subset: Number of reports to sample randomly; if None, process all reports.
+        model_name: Model identifier passed to the Groq client.
+        response_format: Groq API response format specification.
+        output_dir: Directory to save extracted JSON files.
+
+    Returns:
+        A tuple of (extraction_files, failed_extractions) where extraction_files
+        is a list of Path objects to successfully extracted JSON files and
+        failed_extractions is a list of dicts with 'report_id' and 'error' keys.
+    """
     failed_extractions = []
     extraction_files = []
     if subset:
