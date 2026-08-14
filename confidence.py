@@ -38,12 +38,12 @@ def load_raw_report(reports_df: pd.DataFrame, report_id: str) -> str | None:
     return matches.iloc[0]
 
 
-def embed_string(string: str) -> object:
+def embed_string(string: str):
     """Encode text into an embedding tensor used for similarity comparisons."""
     return STR_EMBEDDING_MODEL.encode(string, convert_to_tensor=True)
 
 
-def embedded_strings_similarity(embedding1: object, embedding2: object) -> float:
+def embedded_strings_similarity(embedding1, embedding2) -> float:
     """Return the cosine similarity between two encoded text embeddings."""
     return util.cos_sim(embedding1, embedding2).item()
 

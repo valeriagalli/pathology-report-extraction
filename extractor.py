@@ -13,12 +13,13 @@ client = Groq()
 
 
 def build_extractor(
-    model_name: str, prompt, response_format: dict, raw_report: str = ""
+    model_name: str, prompt: str, response_format: dict, raw_report: str = ""
 ) -> PathologyExtraction:
     """Query the LLM to extract structured pathology information.
 
     Args:
         model_name: Model identifier passed to the Groq client.
+        prompt: System prompt for the LLM.
         response_format: Groq API response format specification (e.g., JSON schema).
         raw_report: The raw report text to extract from.
 
