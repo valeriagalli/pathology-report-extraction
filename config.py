@@ -17,7 +17,7 @@ RESULTS_DIR = ROOT_DIR / "results"
 # ---------------------------------------------------------------------------
 # Pipeline
 # ---------------------------------------------------------------------------
-RAND_SUBSET = 5
+RAND_SUBSET = 15
 
 # ---------------------------------------------------------------------------
 # Raw text processing
@@ -97,14 +97,14 @@ MODELS = {
                 "schema": PathologyExtraction.model_json_schema(),
             },
         },
-        "extraction_dir": RESULTS_DIR / "gpt_oss" / "extractions",
-        "validation_dir": RESULTS_DIR / "gpt_oss" / "validations",
+        "extraction_dir": RESULTS_DIR / "gpt_oss" / "extraction",
+        "validation_dir": RESULTS_DIR / "gpt_oss" / "validation",
     },
     "llama": {
         "name": "llama-3.3-70b-versatile",
         "prompt": PROMPT,
         "response_format": {"type": "json_object"},
-        "extraction_dir": RESULTS_DIR / "llama" / "extractions",
+        "extraction_dir": RESULTS_DIR / "llama" / "extraction",
         "validation_dir": RESULTS_DIR / "llama" / "validation",
     },
 }
