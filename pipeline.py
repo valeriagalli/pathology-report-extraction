@@ -35,7 +35,7 @@ def run_model_pipeline(reports_df: pd.DataFrame, model_config: dict) -> None:
     # Evaluate and save failed extractions
     print(f"\n{model_config['name']} failed: {len(failed_extractions)} / {RAND_SUBSET}")
 
-    failed_extractions_df = pd.DataFrame({"report_id": failed_extractions})
+    failed_extractions_df = pd.DataFrame(failed_extractions)
     if not failed_extractions_df.empty:
         failed_extractions_df.to_csv(
             extraction_dir / "failed_extractions.csv",
