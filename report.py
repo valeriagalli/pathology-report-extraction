@@ -4,10 +4,7 @@ import re
 
 import pandas as pd
 
-from config import REPORTS_FP
-
-MIN_TEXT_LEN = 10
-MAX_SEGMENT_LEN = 200
+from config import MAX_SEGMENT_LEN, MIN_TEXT_LEN, REPORTS_FP
 
 
 def flag_short_report(report_id: str, report_text: str) -> None:

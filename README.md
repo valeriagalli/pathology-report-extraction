@@ -79,7 +79,7 @@ pathology-report-extraction/
 - [x] LLM extraction agent (direct Groq API)
 - [x] Grounding-based confidence scoring
 - [X] Review queue
-- [ ] End-to-end pipeline over TCGA-Reports dataset
+- [X] End-to-end pipeline over TCGA-Reports dataset
 
 
 ## Status

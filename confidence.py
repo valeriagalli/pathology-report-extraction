@@ -4,14 +4,15 @@ from difflib import SequenceMatcher
 from pathlib import Path
 
 import pandas as pd
-from sentence_transformers import SentenceTransformer, util
+from sentence_transformers import util
 
+from config import (
+    EVIDENCE_SEMANTIC_SIMILARITY_TH,
+    STR_EMBEDDING_MODEL,
+    VALUE_EVIDENCE_SIMILARITY_TH,
+)
 from report import detect_text_units, normalize_string
 from schema import ExtractedField, PathologyExtraction
-
-EMBEDDING_MODEL = SentenceTransformer("all-MiniLM-L6-v2")
-VALUE_EVIDENCE_SIMILARITY_TH = 0.75
-EVIDENCE_SEMANTIC_SIMILARITY_TH = 0.75
 
 
 def load_and_validate_result(file: Path) -> PathologyExtraction | None:
@@ -39,7 +40,7 @@ def load_raw_report(reports_df: pd.DataFrame, report_id: str) -> str | None:
 
 def embed_string(string: str) -> object:
     """Encode text into an embedding tensor used for similarity comparisons."""
-    return EMBEDDING_MODEL.encode(string, convert_to_tensor=True)
+    return STR_EMBEDDING_MODEL.encode(string, convert_to_tensor=True)
 
 
 def embedded_strings_similarity(embedding1: object, embedding2: object) -> float:

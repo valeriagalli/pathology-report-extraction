@@ -9,39 +9,11 @@ from groq import Groq
 from review import get_clean_error
 from schema import PathologyExtraction
 
-PROMPT_TEMPLATE = """
-You are extracting structured clinical information from pathology reports.
-
-The report may contain OCR artifacts such as typos, garbled characters, or
-formatting noise from scanned PDFs. Correct an obvious OCR artifact only when
-the intended text is unambiguous from the surrounding context. Do not infer
-clinical information that is not supported by the report.
-
-Extract the following information:
-- primary diagnosis
-- tumor site
-- tumor grade
-- pathological stage
-- surgical margin status
-
-For each field:
-- Return the extracted value only when it is explicitly supported by the report.
-- Do not infer information that is not stated in the report.
-- If the information is absent or cannot be determined, return null.
-- Provide the relevant text from the report as evidence for every extracted value.
-- Preserve the meaning and terminology of the original report.
-- Do not use external knowledge to fill missing information.
-
-Return the result as valid JSON according to the provided extraction schema.
-
-"""
-
-
 client = Groq()
 
 
 def build_extractor(
-    model_name: str, response_format: dict, raw_report: str = ""
+    model_name: str, prompt, response_format: dict, raw_report: str = ""
 ) -> PathologyExtraction:
     """Query the LLM to extract structured pathology information.
 
@@ -59,7 +31,7 @@ def build_extractor(
         messages=[
             {
                 "role": "system",
-                "content": PROMPT_TEMPLATE,
+                "content": prompt,
             },
             {"role": "user", "content": f"Pathology report text:\n{raw_report}"},
         ],
@@ -77,6 +49,7 @@ def run_extraction(
     reports_df_all: pd.DataFrame,
     subset: int | None,
     model_name: str,
+    prompt: str,
     response_format: dict,
     output_dir: Path,
 ) -> tuple[list[Path], list[dict[str, str]]]:
@@ -113,7 +86,9 @@ def run_extraction(
         else:
             # extract report
             try:
-                extracted = build_extractor(model_name, response_format, report_text)
+                extracted = build_extractor(
+                    model_name, prompt, response_format, report_text
+                )
             except Exception as e:
                 error_msg = get_clean_error(e)
                 print(f"\nFAILED {report_id}: {error_msg}")

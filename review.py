@@ -4,9 +4,11 @@ import re
 
 import pandas as pd
 
-EVIDENCE_REPORT_GROUNDING_TH = 0.70
-VALUE_EVIDENCE_CONSISTENCY_TH = 0.70
-MAX_ERROR_MSG_LEN = 120
+from config import (
+    EVIDENCE_REPORT_GROUNDING_TH,
+    MAX_ERROR_MSG_LEN,
+    VALUE_EVIDENCE_CONSISTENCY_TH,
+)
 
 
 def get_clean_error(e: object, max_len: int = MAX_ERROR_MSG_LEN) -> str:
