@@ -11,12 +11,12 @@ from review import generate_field_level_review, generate_overall_review
 
 def run_model_pipeline(reports_df: pd.DataFrame, model_config: dict) -> None:
     """Run extraction, validation, and review with a selected model.
-    
+
     Args:
         reports_df: DataFrame containing raw reports.
         model_config: Configuration dict for the extraction model.
     """
-    # Create directories 
+    # Create directories
     extraction_dir = model_config["extraction_dir"]
     validation_dir = model_config["validation_dir"]
     extraction_dir.mkdir(parents=True, exist_ok=True)

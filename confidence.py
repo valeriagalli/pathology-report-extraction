@@ -11,7 +11,7 @@ from config import (
     STR_EMBEDDING_MODEL,
     VALUE_EVIDENCE_SIMILARITY_TH,
 )
-from report import detect_text_units, normalize_string
+from text_processing import detect_text_units, normalize_string
 from schema import ExtractedField, PathologyExtraction
 
 

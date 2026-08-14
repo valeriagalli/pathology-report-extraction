@@ -129,11 +129,11 @@ def generate_field_level_review(
     field_results_df: pd.DataFrame, review_queue_df: pd.DataFrame
 ) -> pd.DataFrame:
     """Filter field-level validation results for reports requiring review.
-    
+
     Args:
         field_results_df: Field-level validation metrics for all reports.
         review_queue_df: DataFrame with report IDs requiring review.
-    
+
     Returns:
         Field-level results for reports in the review queue.
     """

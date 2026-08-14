@@ -41,22 +41,23 @@ This is a pre-cleaned version of TCGA pathology reports (Kefeli & Tatonetti, 202
 ## Features
 
 
-
 ## Project structure
 ```text
 pathology-report-extraction/
 ├── dataset/
 │   └── TCGA_Reports.csv              # gitignored, fetch separately
-├── results/
-│   └── directAPI/                    # gitignored, generated outputs
-│       ├── extractions/
-│       │   ├── failed_extractions.csv
-│       │   └── <patient_id>.json
-│       │   └── ...
-│       └── validation/
-│           ├── validation_overview.csv
-│           ├── field_results.csv
-│           └── ...
+├── results/                           # gitignored, generated outputs
+│   ├── <model_name>/
+│   │   ├── extractions/
+│   │   │   ├── failed_extractions.csv
+│   │   │   └── <patient_id>.json
+│   │   └── validation/
+│   │       ├── validation_overview.csv
+│   │       ├── field_results.csv
+│   │       ├── review_queue_all.csv
+│   │       └── review_queue_field_level.csv
+│   └── agreement/
+│       └── model_agreement.csv
 ├── test_fixtures/
 │   ├── test_report.pdf
 │   └── blank_test.pdf
@@ -64,8 +65,11 @@ pathology-report-extraction/
 ├── report.py
 ├── extractor.py
 ├── confidence.py
+├── model_agreement.py
+├── review.py
 ├── schema.py
 ├── config.py
+├── pipeline.py
 ├── requirements.txt
 ├── .gitignore
 └── README.md
@@ -73,13 +77,20 @@ pathology-report-extraction/
 
 ## Roadmap
 
-### v0.1 (in progress)
+### v0.1 — Single-model extraction
 - [x] PDF text ingestion
 - [x] Extraction schema
 - [x] LLM extraction agent (direct Groq API)
-- [x] Grounding-based confidence scoring
-- [X] Review queue
-- [X] End-to-end pipeline over TCGA-Reports dataset
+- [x] Validation and human-in-the-loop review
+- [x] End-to-end pipeline over TCGA-Reports dataset
+- [ ] Unit test coverage
+
+### v0.2 — Multi-model extraction
+- [x] Multi-model extraction support
+- [x] Cross-model agreement analysis
+- [ ] Composite confidence score
+- [ ] Integrate model agreement into review workflow
+- [ ] Organize model-specific and cross-model results
 
 
 ## Status
