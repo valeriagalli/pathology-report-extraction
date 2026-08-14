@@ -9,7 +9,7 @@ DATA_DIR = ROOT_DIR / "dataset"
 REPORTS_FP = DATA_DIR / "TCGA_Reports.csv"
 RESULTS_DIR = ROOT_DIR / "results"
 
-GPT_OSS_DIR = RESULTS_DIR / "GPT_OSS"
+GPT_OSS_DIR = RESULTS_DIR / "gpt_oss"
 GPT_OSS_EXTRACTIONS_DIR = GPT_OSS_DIR / "extractions"
 GPT_OSS_VALIDATION_DIR = GPT_OSS_DIR / "validation"
 
@@ -24,4 +24,4 @@ RESPONSE_FORMAT = {
     },
 }
 
-RAND_SUBSET = 50
+RAND_SUBSET = 5

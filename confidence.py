@@ -7,7 +7,7 @@ import pandas as pd
 from sentence_transformers import SentenceTransformer, util
 
 from report import detect_text_units, normalize_string
-from schema import PathologyExtraction
+from schema import ExtractedField, PathologyExtraction
 
 EMBEDDING_MODEL = SentenceTransformer("all-MiniLM-L6-v2")
 VALUE_EVIDENCE_SIMILARITY_TH = 0.75
@@ -38,13 +38,13 @@ def load_raw_report(reports_df: pd.DataFrame, report_id: str) -> str | None:
 
 
 def embed_string(string: str) -> object:
-    """Encode text into an embedding tensor."""
+    """Encode text into an embedding tensor used for similarity comparisons."""
     return EMBEDDING_MODEL.encode(string, convert_to_tensor=True)
 
 
-def embedded_strings_similarity(string1: object, string2: object) -> float:
-    """Compare two embeddings and return a similarity score."""
-    return util.cos_sim(string1, string2).item()
+def embedded_strings_similarity(embedding1: object, embedding2: object) -> float:
+    """Return the cosine similarity between two encoded text embeddings."""
+    return util.cos_sim(embedding1, embedding2).item()
 
 
 def find_best_text_unit(evidence: str, text_units: list[str]) -> tuple[float, int]:
@@ -147,9 +147,18 @@ def validate_field_evidence(
 
 
 def validate_field(
-    field_name: str, extracted_field: PathologyExtraction | None, report_raw_clean: str
+    field_name: str, extracted_field: ExtractedField | None, report_raw_clean: str
 ) -> dict[str, float | bool | None]:
-    """Validate one field and return a dictionary of result metrics."""
+    """Validate one extracted field against its evidence and the source report.
+
+    Args:
+        field_name: Name of the schema field being validated.
+        extracted_field: Extracted value and supporting evidence, if available.
+        report_raw_clean: Normalized raw report text.
+
+    Returns:
+        Validation metrics, or an empty dictionary for unpopulated fields.
+    """
     print("\nField name:\t", field_name)
     if extracted_field is None:
         return {}

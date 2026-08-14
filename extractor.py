@@ -6,6 +6,7 @@ from pathlib import Path
 import pandas as pd
 from groq import Groq
 
+from review import get_clean_error
 from schema import PathologyExtraction
 
 PROMPT_TEMPLATE = """
@@ -97,7 +98,7 @@ def run_extraction(
     failed_extractions = []
     extraction_files = []
     if subset:
-        reports_df = reports_df_all.sample(n=subset, random_state=42)
+        reports_df = reports_df_all.sample(n=subset, random_state=10)
     else:
         reports_df = reports_df_all
     for _, row in reports_df.iterrows():
@@ -105,15 +106,22 @@ def run_extraction(
         report_text = row["text"]
 
         id_result_fp = output_dir / f"{report_id}.json"
-        try:
-            extracted = build_extractor(model_name, response_format, report_text)
-        except Exception as e:
-            print(f"FAILED {report_id}: {e}")
-            failed_extractions.append({"report_id": report_id, "error": str(e)})
+        # report already extracted
+        if id_result_fp.is_file():
+            extraction_files.append(id_result_fp)
             continue
-        with open(id_result_fp, "w") as res_fp:
-            json.dump(extracted.model_dump(), res_fp, indent=2)
-        extraction_files.append(id_result_fp)
-        print(f"Saved extracted data for {report_id}")
+        else:
+            # extract report
+            try:
+                extracted = build_extractor(model_name, response_format, report_text)
+            except Exception as e:
+                error_msg = get_clean_error(e)
+                print(f"\nFAILED {report_id}: {error_msg}")
+                failed_extractions.append({"report_id": report_id, "error": error_msg})
+                continue
+            with open(id_result_fp, "w") as res_fp:
+                json.dump(extracted.model_dump(), res_fp, indent=2)
+            extraction_files.append(id_result_fp)
+            print(f"Saved extracted data for {report_id}")
 
     return extraction_files, failed_extractions
