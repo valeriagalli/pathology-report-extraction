@@ -4,7 +4,7 @@ import re
 
 import pandas as pd
 
-from config import MAX_SEGMENT_LEN, MIN_TEXT_LEN, REPORTS_FP
+from config import DATA_DIR, MAX_SEGMENT_LEN, MIN_TEXT_LEN, REPORTS_FP
 
 
 def flag_short_report(report_id: str, report_text: str) -> None:
@@ -67,7 +67,7 @@ def segment_text(text: str, max_length: int = MAX_SEGMENT_LEN) -> list[str]:
     return segments
 
 
-if __name__ == "__main__":
+def run_reports_overview(REPORTS_FP):
     reports_raw_df = pd.read_csv(REPORTS_FP).copy()
     reports_raw_df["n_periods"] = reports_raw_df["text"].str.count(r"\.")
     reports_raw_df["n_characters"] = reports_raw_df["text"].str.len()
@@ -83,4 +83,10 @@ if __name__ == "__main__":
 
     reports_raw_df["n_text_units"] = n_text_units
     reports_raw_df["n_segments"] = n_segments
-    print(reports_raw_df.drop(columns=["text"]).describe())
+    reports_overview = reports_raw_df.drop(columns=["text"]).describe()
+    return reports_overview
+    
+
+if __name__ == "__main__":
+    reports_overview = run_reports_overview(REPORTS_FP)
+    reports_overview.to_csv(DATA_DIR / "reports_overview.csv", index=False)

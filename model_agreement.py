@@ -3,9 +3,9 @@
 from collections import Counter
 
 import pandas as pd
-from report import normalize_string
 
 from schema import PathologyExtraction
+from text_processing import normalize_string
 
 
 def get_common_extraction_files(models_config: dict) -> list[str]:
@@ -24,11 +24,11 @@ def calculate_field_agreement(
     report_id: str, model_results: list[PathologyExtraction]
 ) -> list[dict[str, str | float]]:
     """Calculate field agreement across models for a single report.
-
+    
     Args:
         report_id: Identifier for the report.
         model_results: List of extraction results from different models.
-
+    
     Returns:
         List of agreement metrics for each field.
     """
@@ -61,10 +61,10 @@ def calculate_field_agreement(
 
 def run_model_agreement(models_config: dict) -> pd.DataFrame:
     """Calculate field agreement across all extraction models.
-
+    
     Args:
         models_config: Configuration dict with model extraction directories.
-
+    
     Returns:
         DataFrame with agreement metrics for all reports and fields.
     """
