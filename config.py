@@ -18,6 +18,7 @@ RESULTS_DIR = ROOT_DIR / "results"
 # Pipeline
 # ---------------------------------------------------------------------------
 RAND_SUBSET = 150
+RAND_SEED = 42
 
 # ---------------------------------------------------------------------------
 # Raw text processing
@@ -98,15 +99,24 @@ MODELS = {
             },
         },
         "extraction_dir": RESULTS_DIR / "gpt_oss" / "extraction",
+        "review_dir": RESULTS_DIR / "gpt_oss" / "review",
         "validation_dir": RESULTS_DIR / "gpt_oss" / "validation",
     },
-    "llama": {
-        "name": "llama-3.3-70b-versatile",
-        "prompt": PROMPT,
-        "response_format": {"type": "json_object"},
-        "extraction_dir": RESULTS_DIR / "llama" / "extraction",
-        "validation_dir": RESULTS_DIR / "llama" / "validation",
-    },
+    "gpt_oss_20": {
+            "name": "openai/gpt-oss-20b",
+            "prompt": PROMPT,
+            "response_format": {
+                "type": "json_schema",
+                "json_schema": {
+                    "name": "pathology_extraction",
+                    "strict": True,
+                    "schema": PathologyExtraction.model_json_schema(),
+                },
+            },
+            "extraction_dir": RESULTS_DIR / "gpt_oss_20" / "extraction",
+            "review_dir": RESULTS_DIR / "gpt_oss_20" / "review",
+            "validation_dir": RESULTS_DIR / "gpt_oss_20" / "validation",
+        },
 }
 
 # ---------------------------------------------------------------------------
@@ -119,6 +129,11 @@ EVIDENCE_SEMANTIC_SIMILARITY_TH = 0.75
 # ---------------------------------------------------------------------------
 # Settings for human review
 # ---------------------------------------------------------------------------
+DEFAULT_WEIGHTS = {
+    "evidence_grounding": 0.4,
+    "value_evidence_consistency": 0.3,
+    "model_agreement": 0.3,
+}
 EVIDENCE_REPORT_GROUNDING_TH = 0.70
 VALUE_EVIDENCE_CONSISTENCY_TH = 0.70
-MAX_ERROR_MSG_LEN = 120
+MAX_ERROR_MSG_LEN = 200

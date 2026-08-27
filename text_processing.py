@@ -89,4 +89,4 @@ def run_reports_overview(REPORTS_FP):
 
 if __name__ == "__main__":
     reports_overview = run_reports_overview(REPORTS_FP)
-    reports_overview.to_csv(DATA_DIR / "reports_overview.csv", index=False)
+    reports_overview.to_csv(DATA_DIR / "reports_overview.csv", float_format="%.2f")
