@@ -49,6 +49,7 @@ def build_extractor(
 def run_extraction(
     reports_df_all: pd.DataFrame,
     subset: int | None,
+    rand_seed,
     model_name: str,
     prompt: str,
     response_format: dict,
@@ -69,11 +70,11 @@ def run_extraction(
         is a list of Path objects to successfully extracted JSON files and
         failed_extractions is a list of dicts with 'report_id' and 'error' keys.
     """
-    print(f"\n\nRunning extraction with {model_name}...")
+    print(f"\n\nRunning extraction with model ``{model_name}``...")
     failed_extractions = []
     extraction_files = []
     if subset:
-        reports_df = reports_df_all.sample(n=subset, random_state=42)
+        reports_df = reports_df_all.sample(n=subset, random_state=rand_seed)
     else:
         reports_df = reports_df_all
     for _, row in reports_df.iterrows():
