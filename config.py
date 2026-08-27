@@ -130,6 +130,7 @@ EVIDENCE_SEMANTIC_SIMILARITY_TH = 0.75
 # ---------------------------------------------------------------------------
 # Settings for human review
 # ---------------------------------------------------------------------------
+MAX_ERROR_MSG_LEN = 200
 DEFAULT_WEIGHTS = {
     "evidence_grounding": 0.4,
     "value_evidence_consistency": 0.3,
@@ -137,7 +138,7 @@ DEFAULT_WEIGHTS = {
 }
 EVIDENCE_REPORT_GROUNDING_TH = 0.70
 VALUE_EVIDENCE_CONSISTENCY_TH = 0.70
-MAX_ERROR_MSG_LEN = 200
+COMPOSITE_SCORE_TH = 0.60
 
 # ---------------------------------------------------------------------------
 # Settings for logging

@@ -5,6 +5,7 @@ import re
 import pandas as pd
 
 from config import (
+    COMPOSITE_SCORE_TH,
     EVIDENCE_REPORT_GROUNDING_TH,
     MAX_ERROR_MSG_LEN,
     VALUE_EVIDENCE_CONSISTENCY_TH,
@@ -47,6 +48,8 @@ def build_review_reason(row: pd.Series) -> str:
         reasons.append("value/evidence mismatch")
     if row["evidence_grounding_missing"]:
         reasons.append("evidence not grounded")
+    if row["low_composite_score"]:
+        reasons.append("low composite confidence score")
     return "; ".join(reasons)
 
 
@@ -77,6 +80,9 @@ def generate_overall_review(
                     validation_overview["evidence_report_grounding"]
                     < EVIDENCE_REPORT_GROUNDING_TH
                 ),
+                "low_composite_score": (
+                    validation_overview["composite_score"] < COMPOSITE_SCORE_TH
+                ),
             }
         )
     else:
@@ -86,6 +92,7 @@ def generate_overall_review(
                 "failed_extraction",
                 "value_evidence_inconsistency",
                 "evidence_grounding_missing",
+                "low_composite_score",
             ]
         )
 

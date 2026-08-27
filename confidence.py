@@ -44,7 +44,9 @@ def load_raw_report(reports_df: pd.DataFrame, report_id: str) -> str | None:
 
 def embed_string(string: str):
     """Encode text into an embedding tensor used for similarity comparisons."""
-    return STR_EMBEDDING_MODEL.encode(string, convert_to_tensor=True)
+    return STR_EMBEDDING_MODEL.encode(
+        string, convert_to_tensor=True, show_progress_bar=False
+    )
 
 
 def embedded_strings_similarity(embedding1, embedding2) -> float:
@@ -287,12 +289,20 @@ def validate_extraction(
         else 0.0
     )
 
+    # Composite score as average of the per-field composite scores
+    report_composite_score = (
+        sum(r["composite_score"] for r in field_results_list) / fields_with_value_and_evidence
+        if fields_with_value_and_evidence
+        else 0.0
+    )
+
     validation_result = {
         "report_id": report_id,
         "field_coverage": field_coverage,
         "evidence_coverage": evidence_coverage,
         "value_evidence_consistency": value_evidence_consistency,
         "evidence_report_grounding": evidence_report_grounding,
+        "composite_score": report_composite_score,
     }
 
     logger.debug("\nValidation results overview")
@@ -308,7 +318,7 @@ def compute_field_composite_score(field_result, weights=DEFAULT_WEIGHTS):
     value_score = field_result["value_evidence_score"]
     return (
         weights["evidence_grounding"] * grounding_score
-        + weights["value_evidence"] * value_score
+        + weights["value_evidence_consistency"] * value_score
     )
 
 

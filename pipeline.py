@@ -10,6 +10,9 @@ from extractor import run_extraction
 from model_agreement import run_model_agreement
 from review import generate_field_level_review, generate_overall_review
 
+logging.basicConfig(level=LOG_LEVEL, format="%(message)s")
+logger = logging.getLogger(__name__)
+
 
 def run_model_pipeline(reports_df: pd.DataFrame, model_config: dict) -> None:
     """Run extraction, validation, and review with a selected model.
@@ -39,7 +42,9 @@ def run_model_pipeline(reports_df: pd.DataFrame, model_config: dict) -> None:
     )
 
     # Evaluate and save failed extractions
-    print(f"\n{model_config['name']} failed: {len(failed_extractions)} / {RAND_SUBSET}")
+    logger.info(
+        f"\n{model_config['name']} failed: {len(failed_extractions)} / {RAND_SUBSET}"
+    )
 
     failed_extractions_df = pd.DataFrame(failed_extractions)
     if not failed_extractions_df.empty:
@@ -104,5 +109,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=LOG_LEVEL, format="%(message)s")
     main()
