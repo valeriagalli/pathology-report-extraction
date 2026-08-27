@@ -85,7 +85,7 @@ def run_reports_overview(REPORTS_FP):
     reports_raw_df["n_segments"] = n_segments
     reports_overview = reports_raw_df.drop(columns=["text"]).describe()
     return reports_overview
-    
+
 
 if __name__ == "__main__":
     reports_overview = run_reports_overview(REPORTS_FP)

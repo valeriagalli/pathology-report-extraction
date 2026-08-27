@@ -87,7 +87,7 @@ Use exactly these field names and do not add or remove fields.
 # Model configuration
 # ---------------------------------------------------------------------------
 MODELS = {
-    "gpt_oss": {
+    "gpt_oss_120b": {
         "name": "openai/gpt-oss-120b",
         "prompt": PROMPT,
         "response_format": {
@@ -98,25 +98,25 @@ MODELS = {
                 "schema": PathologyExtraction.model_json_schema(),
             },
         },
-        "extraction_dir": RESULTS_DIR / "gpt_oss" / "extraction",
-        "review_dir": RESULTS_DIR / "gpt_oss" / "review",
-        "validation_dir": RESULTS_DIR / "gpt_oss" / "validation",
+        "extraction_dir": RESULTS_DIR / "gpt_oss_120b" / "extraction",
+        "review_dir": RESULTS_DIR / "gpt_oss_120b" / "review",
+        "validation_dir": RESULTS_DIR / "gpt_oss_120b" / "validation",
     },
-    "gpt_oss_20": {
-            "name": "openai/gpt-oss-20b",
-            "prompt": PROMPT,
-            "response_format": {
-                "type": "json_schema",
-                "json_schema": {
-                    "name": "pathology_extraction",
-                    "strict": True,
-                    "schema": PathologyExtraction.model_json_schema(),
-                },
+    "gpt_oss_20b": {
+        "name": "openai/gpt-oss-20b",
+        "prompt": PROMPT,
+        "response_format": {
+            "type": "json_schema",
+            "json_schema": {
+                "name": "pathology_extraction",
+                "strict": True,
+                "schema": PathologyExtraction.model_json_schema(),
             },
-            "extraction_dir": RESULTS_DIR / "gpt_oss_20" / "extraction",
-            "review_dir": RESULTS_DIR / "gpt_oss_20" / "review",
-            "validation_dir": RESULTS_DIR / "gpt_oss_20" / "validation",
         },
+        "extraction_dir": RESULTS_DIR / "gpt_oss_20b" / "extraction",
+        "review_dir": RESULTS_DIR / "gpt_oss_20b" / "review",
+        "validation_dir": RESULTS_DIR / "gpt_oss_20b" / "validation",
+    },
 }
 
 # ---------------------------------------------------------------------------

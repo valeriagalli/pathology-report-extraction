@@ -7,6 +7,7 @@ import pandas as pd
 from sentence_transformers import util
 
 from config import (
+    DEFAULT_WEIGHTS,
     EVIDENCE_SEMANTIC_SIMILARITY_TH,
     STR_EMBEDDING_MODEL,
     VALUE_EVIDENCE_SIMILARITY_TH,
@@ -78,7 +79,9 @@ def validate_field_value(value: str, evidence: str) -> tuple[float | None, bool]
     if value in evidence:
         print("Value-evidence consistency:\tDIRECT MATCH\t✅ PASS")
         passed = True
-        similarity_score = None
+        similarity_score = (
+            1.0  # technically not computed, used for consistency in the exported csv
+        )
 
     else:
         similarity_score = embedded_strings_similarity(
@@ -252,10 +255,12 @@ def validate_extraction(
             continue
 
         field_result = validate_field(field_name, extracted_field, report_raw_clean)
+        composite_score = compute_field_composite_score(field_result)
         record = {
             "report_id": report_id,
             "field_name": field_name,
             **field_result,
+            "composite_score": composite_score,
         }
         field_results_list.append(record)
 
@@ -294,6 +299,16 @@ def validate_extraction(
     return validation_result, field_results_list
 
 
+def compute_field_composite_score(field_result, weights=DEFAULT_WEIGHTS):
+    """Compute composite confidence score based on default weights."""
+    grounding_score = field_result["evidence_semantic_score"]
+    value_score = field_result["value_evidence_score"]
+    return (
+        weights["evidence_grounding"] * grounding_score
+        + weights["value_evidence"] * value_score
+    )
+
+
 def run_confidence_validation(
     extraction_files: list[Path], reports_raw_df: pd.DataFrame
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
@@ -309,6 +324,7 @@ def run_confidence_validation(
         is a DataFrame of summary metrics per report and field_results is a
         DataFrame of per-field validation results.
     """
+
     validation_results = []
     all_field_results = []
 
