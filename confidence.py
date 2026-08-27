@@ -1,5 +1,6 @@
 """Generate confidence score of the extracted fields."""
 
+import logging
 from difflib import SequenceMatcher
 from pathlib import Path
 
@@ -12,8 +13,10 @@ from config import (
     STR_EMBEDDING_MODEL,
     VALUE_EVIDENCE_SIMILARITY_TH,
 )
-from text_processing import detect_text_units, normalize_string
 from schema import ExtractedField, PathologyExtraction
+from text_processing import detect_text_units, normalize_string
+
+logger = logging.getLogger(__name__)
 
 
 def load_and_validate_result(file: Path) -> PathologyExtraction | None:
@@ -25,7 +28,7 @@ def load_and_validate_result(file: Path) -> PathologyExtraction | None:
         try:
             report = PathologyExtraction.model_validate_json(f.read())
         except Exception as e:
-            print(f"FAILED {file.stem}: {e}")
+            logger.error(f"FAILED {file.stem}: {e}")
             return None
     return report
 
@@ -34,7 +37,7 @@ def load_raw_report(reports_df: pd.DataFrame, report_id: str) -> str | None:
     """Return the raw report text for `report_id`, or `None` if missing."""
     matches = reports_df.loc[reports_df["patient_filename"] == report_id, "text"]
     if matches.empty:
-        print(f"No raw report text found for patient ID {report_id}")
+        logger.warning(f"No raw report text found for patient ID {report_id}")
         return None
     return matches.iloc[0]
 
@@ -77,7 +80,7 @@ def validate_field_value(value: str, evidence: str) -> tuple[float | None, bool]
         and passed is True if validation succeeded.
     """
     if value in evidence:
-        print("Value-evidence consistency:\tDIRECT MATCH\t✅ PASS")
+        logger.debug("Value-evidence consistency:\tDIRECT MATCH\t✅ PASS")
         passed = True
         similarity_score = (
             1.0  # technically not computed, used for consistency in the exported csv
@@ -91,15 +94,15 @@ def validate_field_value(value: str, evidence: str) -> tuple[float | None, bool]
 
         passed = similarity_score > VALUE_EVIDENCE_SIMILARITY_TH
 
-        print(
+        logger.debug(
             f"\tValue-evidence consistency:\t"
             f"{similarity_score:.2f}\t"
             f"{'✅ PASS' if passed else '❌ FAIL'}"
         )
 
     if not passed:
-        print(f"\t\tValue:\t{value}")
-        print(f"\t\tEvidence:\t{evidence}")
+        logger.debug(f"\t\tValue:\t{value}")
+        logger.debug(f"\t\tEvidence:\t{evidence}")
 
     return similarity_score, passed
 
@@ -125,11 +128,11 @@ def validate_field_evidence(
 
     candidate_units = combine_adjacent_units(best_unit_index, text_units)
     candidate = " ".join(candidate_units)
-    print("Evidence Grounding")
+    logger.debug("Evidence Grounding")
     if evidence in candidate:
         semantic_match_score = 1.0
         passed = True
-        print("\tEvidence grounding\tDIRECT MATCH\t✅ PASS")
+        logger.debug("\tEvidence grounding\tDIRECT MATCH\t✅ PASS")
     else:
         semantic_match_score = embedded_strings_similarity(
             evidence_embedded,
@@ -137,15 +140,15 @@ def validate_field_evidence(
         )
         passed = semantic_match_score > EVIDENCE_SEMANTIC_SIMILARITY_TH
 
-        print(f"\tEvidence lexical:\t{best_lexical_score:.2f}")
-        print(
+        logger.debug(f"\tEvidence lexical:\t{best_lexical_score:.2f}")
+        logger.debug(
             f"\tEvidence semantic:\t{semantic_match_score:.2f}  "
             f"{'✅ PASS' if passed else '❌ FAIL'}"
         )
 
     if not passed:
-        print(f"\t\tEvidence:\t{evidence}")
-        print(f"\t\tCandidate:\t{candidate}")
+        logger.debug(f"\t\tEvidence:\t{evidence}")
+        logger.debug(f"\t\tCandidate:\t{candidate}")
 
     return best_lexical_score, semantic_match_score, passed
 
@@ -163,11 +166,11 @@ def validate_field(
     Returns:
         Validation metrics, or an empty dictionary for unpopulated fields.
     """
-    print("\nField name:\t", field_name)
+    logger.debug(f"\nField name:\t{field_name}")
     if extracted_field is None:
         return {}
     if extracted_field.value is not None and extracted_field.evidence is None:
-        print(f"WARNING: existing value but missing evidence for {field_name}")
+        logger.debug(f"WARNING: existing value but missing evidence for {field_name}")
 
     if extracted_field.value is None or extracted_field.evidence is None:
         return {}
@@ -292,9 +295,9 @@ def validate_extraction(
         "evidence_report_grounding": evidence_report_grounding,
     }
 
-    print("\nValidation results overview")
+    logger.debug("\nValidation results overview")
     for key, item in validation_result.items():
-        print(f"{key}\t{item}")
+        logger.debug(f"{key}\t{item}")
 
     return validation_result, field_results_list
 
@@ -330,7 +333,7 @@ def run_confidence_validation(
 
     for file in extraction_files:
         report_id = file.stem
-        print(f"\n========== Validating\t{report_id} ========== ")
+        logger.debug(f"\n========== Validating\t{report_id} ========== ")
 
         report_raw = load_raw_report(reports_raw_df, report_id)
 
@@ -347,5 +350,7 @@ def run_confidence_validation(
 
     validation_overview = pd.DataFrame(validation_results)
     field_results = pd.DataFrame(all_field_results)
+
+    logger.info(f"Validated {len(validation_results)} reports.")
 
     return validation_overview, field_results

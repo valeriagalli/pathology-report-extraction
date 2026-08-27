@@ -1,11 +1,14 @@
 """Calculate agreement across different extration models."""
 
+import logging
 from collections import Counter
 
 import pandas as pd
 
 from schema import PathologyExtraction
 from text_processing import normalize_string
+
+logger = logging.getLogger(__name__)
 
 
 def get_common_extraction_files(models_config: dict) -> list[str]:
@@ -69,7 +72,7 @@ def run_model_agreement(models_config: dict) -> pd.DataFrame:
         DataFrame with agreement metrics for all reports and fields.
     """
     common_filenames = get_common_extraction_files(models_config)
-    print(
+    logger.info(
         f"Comparing {len(common_filenames)} reports across {len(models_config)} models"
     )
 

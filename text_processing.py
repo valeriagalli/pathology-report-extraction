@@ -1,10 +1,13 @@
 """Inspect raw report text and segment in meaningful sections."""
 
+import logging
 import re
 
 import pandas as pd
 
 from config import DATA_DIR, MAX_SEGMENT_LEN, MIN_TEXT_LEN, REPORTS_FP
+
+logger = logging.getLogger(__name__)
 
 
 def flag_short_report(report_id: str, report_text: str) -> None:
@@ -15,7 +18,7 @@ def flag_short_report(report_id: str, report_text: str) -> None:
         report_text: Raw report text to check.
     """
     if len(report_text.strip()) < MIN_TEXT_LEN:
-        print(
+        logger.WARNING(
             f"WARNING: unusually short report {report_id}: text length = {len(report_text)}"
         )
 

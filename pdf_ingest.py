@@ -1,11 +1,13 @@
 """PDF ingestion: extract text from a text-based PDF pathology report."""
 
+import logging
 from pathlib import Path
 
 import pdfplumber
 
 test_fixtures_dir = Path("./test_fixtures")
 MIN_CHARS = 50
+logger = logging.getLogger(__name__)
 
 
 def extract_text_from_pdf(fp: Path) -> str:
@@ -47,15 +49,15 @@ if __name__ == "__main__":
     for fp in files:
         try:
             full_text = extract_text_from_pdf(fp)
-            print(f"OK   {fp.name}: {len(full_text)} characters")
+            logger.debug(f"OK   {fp.name}: {len(full_text)} characters")
             succeeded.append(fp.name)
         except ValueError as e:
-            print(f"FAIL {fp.name}: {e}")
+            logger.warning(f"FAIL {fp.name}: {e}")
             failed.append((fp.name, str(e)))
 
-    print(f"\n{len(succeeded)}/{len(files)} succeeded.")
-    print("Succeeded:", succeeded)
-    print("Failed:")
+    logger.info(f"{len(succeeded)}/{len(files)} succeeded.")
+    logger.debug(f"Succeeded: {succeeded}")
+    logger.debug(f"Failed: {failed}")
 
     for name, reason in failed:
-        print(f"  - {name}: {reason}")
+        logger.debug(f"  - {name}: {reason}")

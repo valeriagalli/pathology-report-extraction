@@ -1,6 +1,7 @@
 """Build and run a structured extractor over pathology report text."""
 
 import json
+import logging
 from pathlib import Path
 
 import pandas as pd
@@ -10,6 +11,7 @@ from review import get_clean_error
 from schema import PathologyExtraction
 
 client = Groq()
+logger = logging.getLogger(__name__)
 
 
 def build_extractor(
@@ -70,7 +72,7 @@ def run_extraction(
         is a list of Path objects to successfully extracted JSON files and
         failed_extractions is a list of dicts with 'report_id' and 'error' keys.
     """
-    print(f"\n\nRunning extraction with model ``{model_name}``...")
+    logger.info(f"\n\nRunning extraction with model ``{model_name}``...")
     failed_extractions = []
     extraction_files = []
     if subset:
@@ -94,12 +96,12 @@ def run_extraction(
                 )
             except Exception as e:
                 error_msg = get_clean_error(e)
-                print(f"\nFAILED {report_id}: {error_msg}")
+                logger.warning(f"\nFAILED {report_id}: {error_msg}")
                 failed_extractions.append({"report_id": report_id, "error": error_msg})
                 continue
             with open(id_result_fp, "w") as res_fp:
                 json.dump(extracted.model_dump(), res_fp, indent=2)
             extraction_files.append(id_result_fp)
-            print(f"Saved extracted data for {report_id}")
+            logger.info(f"Saved extracted data for {report_id}")
 
     return extraction_files, failed_extractions

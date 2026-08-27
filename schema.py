@@ -46,4 +46,3 @@ if __name__ == "__main__":
         stage=ExtractedField(value=None, evidence=None),
         margins=ExtractedField(value=None, evidence=None),
     )
-    print(dummy_extraction)

@@ -1,9 +1,11 @@
 """Orchestration pipeline to run extraction from raw report text."""
 
+import logging
+
 import pandas as pd
 
 from confidence import run_confidence_validation
-from config import MODELS, RAND_SEED, RAND_SUBSET, REPORTS_FP, RESULTS_DIR
+from config import LOG_LEVEL, MODELS, RAND_SEED, RAND_SUBSET, REPORTS_FP, RESULTS_DIR
 from extractor import run_extraction
 from model_agreement import run_model_agreement
 from review import generate_field_level_review, generate_overall_review
@@ -102,4 +104,5 @@ def main() -> None:
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=LOG_LEVEL, format="%(message)s")
     main()

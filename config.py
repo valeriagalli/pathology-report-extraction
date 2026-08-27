@@ -1,5 +1,6 @@
 """Shared paths and constants for the pathology extraction pipeline."""
 
+import logging
 from pathlib import Path
 
 from sentence_transformers import SentenceTransformer
@@ -137,3 +138,8 @@ DEFAULT_WEIGHTS = {
 EVIDENCE_REPORT_GROUNDING_TH = 0.70
 VALUE_EVIDENCE_CONSISTENCY_TH = 0.70
 MAX_ERROR_MSG_LEN = 200
+
+# ---------------------------------------------------------------------------
+# Settings for logging
+# ---------------------------------------------------------------------------
+LOG_LEVEL = logging.INFO  # change to logging.DEBUG when debugging closely
