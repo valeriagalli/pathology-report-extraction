@@ -5,11 +5,11 @@ from pathlib import Path
 
 import pandas as pd
 
-from validation import run_confidence_validation
 from config import LOG_LEVEL, MODELS, RAND_SEED, RAND_SUBSET, REPORTS_FP, RESULTS_DIR
 from extraction import run_extraction
 from model_agreement import run_model_agreement
 from review import generate_field_level_review, generate_overall_review
+from validation import run_confidence_validation
 
 logging.basicConfig(level=LOG_LEVEL, format="%(message)s")
 logger = logging.getLogger(__name__)
@@ -95,7 +95,7 @@ def run_model_review(
     review_queue_all.to_csv(review_dir / "review_queue_all.csv", index=False)
 
     review_queue_fields = generate_field_level_review(
-        field_results_df, review_queue_all
+        field_results_df, review_queue_all, agreement_df
     )
     review_queue_fields.to_csv(review_dir / "review_queue_field_level.csv", index=False)
 

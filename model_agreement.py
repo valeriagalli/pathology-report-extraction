@@ -2,6 +2,7 @@
 
 import logging
 from collections import Counter
+from pathlib import Path
 
 import pandas as pd
 
@@ -51,7 +52,7 @@ def calculate_field_agreement(
         agreement_results.append(
             {
                 "report_id": report_id,
-                "field": field,
+                "field_name": field,
                 "consensus_value": consensus_value
                 if consensus_value is not None
                 else "MISSING",
@@ -80,18 +81,18 @@ def run_model_agreement(models_config: dict) -> pd.DataFrame:
 
     # parse extracted reports common to all models
     for filename in common_filenames:
-        report_id = filename
         model_results = []
 
         # Load specific report from every model
         for model_config in models_config.values():
-            file = model_config["extraction_dir"] / report_id
+            file = model_config["extraction_dir"] / filename
 
             with open(file) as f:
                 model_result = PathologyExtraction.model_validate_json(f.read())
             model_results.append(model_result)  # same report, different models
 
         # Calculate agreement
+        report_id = Path(filename).stem
         agreement = calculate_field_agreement(report_id, model_results)
 
         # Append to list containing agreement for all files

@@ -65,6 +65,8 @@ def generate_overall_review(
     Args:
         validation_overview: Per-report confidence metrics.
         failed_extractions: Extraction failures with ``report_id`` and ``error`` keys.
+        agreement_df: Field based model agreement.
+        agreement_th: Threshold for model agreement acceptance.
 
     Returns:
         A DataFrame containing review flags for each affected report.
@@ -124,15 +126,12 @@ def generate_overall_review(
         ].fillna(False)
 
     # Model agreement
-    if agreement_df is not None and not agreement_df.empty:
-        low_agreement_ids = set(
-            agreement_df.loc[agreement_df["agreement"] < agreement_th, "report_id"]
-        )
-        review_queue_df["model_disagreement"] = review_queue_df["report_id"].isin(
-            low_agreement_ids
-        )
-    else:
-        review_queue_df["model_disagreement"] = False
+    low_agreement_report_ids = set(
+        agreement_df.loc[agreement_df["agreement"] < agreement_th, "report_id"]
+    )
+    review_queue_df["model_disagreement"] = review_queue_df["report_id"].isin(
+        low_agreement_report_ids
+    )
 
     # Filter out report ids that do not need review
     review_queue_df = review_queue_df[
@@ -151,18 +150,25 @@ def generate_overall_review(
 
 
 def generate_field_level_review(
-    field_results_df: pd.DataFrame, review_queue_df: pd.DataFrame
+    field_results_df: pd.DataFrame,
+    review_queue_df: pd.DataFrame,
+    agreement_df: pd.DataFrame | None = None,
+    agreement_th: float = MODEL_AGREEMENT_TH,
 ) -> pd.DataFrame:
-    """Filter field-level validation results for reports requiring review.
-
-    Args:
-        field_results_df: Field-level validation metrics for all reports.
-        review_queue_df: DataFrame with report IDs requiring review.
-
-    Returns:
-        Field-level results for reports in the review queue.
-    """
     field_level_review_df = field_results_df[
         field_results_df["report_id"].isin(review_queue_df["report_id"])
-    ]
+    ].copy()
+
+    if agreement_df is not None and not agreement_df.empty:
+        field_level_review_df = field_level_review_df.merge(
+            agreement_df[["report_id", "field_name", "agreement"]],
+            on=["report_id", "field_name"],
+            how="left",
+        )
+        field_level_review_df["model_disagreement"] = (
+            field_level_review_df["agreement"] < agreement_th
+        )
+    else:
+        field_level_review_df["model_disagreement"] = False
+
     return field_level_review_df
