@@ -291,7 +291,8 @@ def validate_extraction(
 
     # Composite score as average of the per-field composite scores
     report_composite_score = (
-        sum(r["composite_score"] for r in field_results_list) / fields_with_value_and_evidence
+        sum(r["composite_score"] for r in field_results_list)
+        / fields_with_value_and_evidence
         if fields_with_value_and_evidence
         else 0.0
     )

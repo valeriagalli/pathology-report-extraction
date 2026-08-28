@@ -8,6 +8,7 @@ from config import (
     COMPOSITE_SCORE_TH,
     EVIDENCE_REPORT_GROUNDING_TH,
     MAX_ERROR_MSG_LEN,
+    MODEL_AGREEMENT_TH,
     VALUE_EVIDENCE_CONSISTENCY_TH,
 )
 
@@ -56,6 +57,8 @@ def build_review_reason(row: pd.Series) -> str:
 def generate_overall_review(
     validation_overview: pd.DataFrame,
     failed_extractions: pd.DataFrame | None,
+    agreement_df: pd.DataFrame | None = None,
+    agreement_th: float = MODEL_AGREEMENT_TH,
 ) -> pd.DataFrame:
     """Build a review queue from failed extractions and low-confidence results.
 
@@ -93,6 +96,7 @@ def generate_overall_review(
                 "value_evidence_inconsistency",
                 "evidence_grounding_missing",
                 "low_composite_score",
+                "model_disagreement",
             ]
         )
 
@@ -119,17 +123,31 @@ def generate_overall_review(
             "evidence_grounding_missing"
         ].fillna(False)
 
+    # Model agreement
+    if agreement_df is not None and not agreement_df.empty:
+        low_agreement_ids = set(
+            agreement_df.loc[agreement_df["agreement"] < agreement_th, "report_id"]
+        )
+        review_queue_df["model_disagreement"] = review_queue_df["report_id"].isin(
+            low_agreement_ids
+        )
+    else:
+        review_queue_df["model_disagreement"] = False
+
     # Filter out report ids that do not need review
     review_queue_df = review_queue_df[
         review_queue_df["failed_extraction"].notna()
         | review_queue_df["value_evidence_inconsistency"]
         | review_queue_df["evidence_grounding_missing"]
+        | review_queue_df["model_disagreement"]
     ]
 
     review_queue_df["review_reason"] = review_queue_df.apply(
         build_review_reason, axis=1
     )
-    return review_queue_df[["report_id", "review_reason", "failed_extraction"]]
+    return review_queue_df[
+        ["report_id", "review_reason", "failed_extraction", "model_disagreement"]
+    ]
 
 
 def generate_field_level_review(

@@ -12,13 +12,14 @@ from schema import PathologyExtraction
 # ---------------------------------------------------------------------------
 ROOT_DIR = Path(__file__).resolve().parent
 DATA_DIR = ROOT_DIR / "dataset"
+DATA_DIR.mkdir(parents=True, exist_ok=True)
 REPORTS_FP = DATA_DIR / "TCGA_Reports.csv"
 RESULTS_DIR = ROOT_DIR / "results"
 
 # ---------------------------------------------------------------------------
 # Pipeline
 # ---------------------------------------------------------------------------
-RAND_SUBSET = 150
+RAND_SUBSET = 10
 RAND_SEED = 42
 
 # ---------------------------------------------------------------------------
@@ -137,6 +138,7 @@ DEFAULT_WEIGHTS = {
     "model_agreement": 0.3,
 }
 EVIDENCE_REPORT_GROUNDING_TH = 0.70
+MODEL_AGREEMENT_TH = 0.5
 VALUE_EVIDENCE_CONSISTENCY_TH = 0.70
 COMPOSITE_SCORE_TH = 0.60
 
