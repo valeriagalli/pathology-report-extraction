@@ -5,9 +5,9 @@ from pathlib import Path
 
 import pandas as pd
 
-from confidence import run_confidence_validation
+from validation import run_confidence_validation
 from config import LOG_LEVEL, MODELS, RAND_SEED, RAND_SUBSET, REPORTS_FP, RESULTS_DIR
-from extractor import run_extraction
+from extraction import run_extraction
 from model_agreement import run_model_agreement
 from review import generate_field_level_review, generate_overall_review
 

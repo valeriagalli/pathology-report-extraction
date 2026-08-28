@@ -116,15 +116,15 @@ pathology-report-extraction/
 │   └── test_report.pdf
 ├── .gitignore
 ├── config.py
-├── confidence.py
-├── extractor.py
+├── extraction.py
 ├── model_agreement.py
-├── pdf_ingest.py
+├── pdf_ingestion.py
 ├── pipeline.py
 ├── README.md
 ├── requirements.txt
 ├── review.py
 ├── schema.py
+├── validation.py
 └── text_processing.py
 ```
 
@@ -142,7 +142,7 @@ pathology-report-extraction/
 - [x] Multi-model extraction support
 - [x] Cross-model agreement analysis
 - [x] Composite confidence score
-- [ ] Integrate model agreement into review workflow
+- [x] Integrate model agreement into review workflow
 
 
 ## Status
