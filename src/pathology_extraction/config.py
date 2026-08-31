@@ -3,14 +3,13 @@
 import logging
 from pathlib import Path
 
+from pathology_extraction.schema import PathologyExtraction
 from sentence_transformers import SentenceTransformer
-
-from schema import PathologyExtraction
 
 # ---------------------------------------------------------------------------
 # Paths
 # ---------------------------------------------------------------------------
-ROOT_DIR = Path(__file__).resolve().parent
+ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 DATA_DIR = ROOT_DIR / "dataset"
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 REPORTS_FP = DATA_DIR / "TCGA_Reports.csv"

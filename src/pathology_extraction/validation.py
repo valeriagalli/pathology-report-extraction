@@ -7,14 +7,14 @@ from pathlib import Path
 import pandas as pd
 from sentence_transformers import util
 
-from config import (
+from pathology_extraction.config import (
     DEFAULT_WEIGHTS,
     EVIDENCE_SEMANTIC_SIMILARITY_TH,
     STR_EMBEDDING_MODEL,
     VALUE_EVIDENCE_SIMILARITY_TH,
 )
-from schema import ExtractedField, PathologyExtraction
-from text_processing import detect_text_units, normalize_string
+from pathology_extraction.schema import ExtractedField, PathologyExtraction
+from pathology_extraction.text_processing import detect_text_units, normalize_string
 
 logger = logging.getLogger(__name__)
 
@@ -237,8 +237,9 @@ def validate_extraction(
 
     Returns:
         A tuple of (validation_result, field_results) where validation_result
-        contains summary metrics (field_coverage, evidence_coverage, value_evidence_consistency,
-        evidence_report_grounding) and field_results is a list of per-field metrics.
+        contains summary metrics (field_coverage, evidence_coverage,
+        value_evidence_consistency, evidence_report_grounding)
+        and field_results is a list of per-field metrics.
     """
 
     # Validate extraction completeness (field completeness and evidence coverage)

@@ -6,9 +6,8 @@ from pathlib import Path
 
 import pandas as pd
 from groq import Groq
-
-from review import get_clean_error
-from schema import PathologyExtraction
+from pathology_extraction.review import get_clean_error
+from pathology_extraction.schema import PathologyExtraction
 
 client = Groq()
 logger = logging.getLogger(__name__)

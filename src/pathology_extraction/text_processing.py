@@ -4,8 +4,7 @@ import logging
 import re
 
 import pandas as pd
-
-from config import DATA_DIR, MAX_SEGMENT_LEN, MIN_TEXT_LEN, REPORTS_FP
+from pathology_extraction.config import DATA_DIR, MAX_SEGMENT_LEN, MIN_TEXT_LEN, REPORTS_FP
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +18,8 @@ def flag_short_report(report_id: str, report_text: str) -> None:
     """
     if len(report_text.strip()) < MIN_TEXT_LEN:
         logger.WARNING(
-            f"WARNING: unusually short report {report_id}: text length = {len(report_text)}"
+            f"WARNING: unusually short report {report_id}: "
+            f"text length = {len(report_text)}"
         )
 
 

@@ -2,8 +2,8 @@
 Test module for the validation module.
 """
 
-from schema import ExtractedField, PathologyExtraction
-from validation import validate_extraction_completeness
+from pathology_extraction.schema import ExtractedField, PathologyExtraction
+from pathology_extraction.validation import validate_extraction_completeness
 
 
 def test_partial_evidence_coverage():

@@ -26,10 +26,12 @@ class PathologyExtraction(BaseModel):
         description="Anatomical site/organ of the tumor, e.g. 'Kidney, left upper pole'"
     )
     grade: ExtractedField = Field(
-        description="Tumor grade, e.g. 'Fuhrman Nuclear Grade II/IV' or 'Gleason 7 (3+4)'"
+        description="Tumor grade, e.g. 'Fuhrman Nuclear Grade II/IV' "
+        "or 'Gleason 7 (3+4)'"
     )
     stage: ExtractedField = Field(
-        description="Pathological stage, e.g. 'pT1' or 'pT2N0M0', TNM notation if present"
+        description="Pathological stage, e.g. 'pT1' or 'pT2N0M0', "
+        "TNM notation if present"
     )
     margins: ExtractedField = Field(
         description="Surgical margin status, e.g. 'Free of tumor' or 'Positive'"

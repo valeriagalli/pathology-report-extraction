@@ -24,13 +24,10 @@ py -3.12 -m venv .venv
 Install the project:
 
 ```powershell
-pip install -r requirements.txt
+pip install -e ".[dev]"
 ```
 
-For development (linting, tests): 
-```powershell
-pip install -r requirements_dev.txt
-```
+Note: dependencies use minimum version bounds rather than exact pins, since this is a demonstration project rather than a deployed service
 
 ## Dataset
 
@@ -102,35 +99,29 @@ Raw TCGA pathology reports are only available as scanned PDF images; this projec
 ## Project structure
 ```text
 pathology-report-extraction/
+├── src/
+│   └── pathology_extraction/
+│       ├── __init__.py
+│       ├── config.py
+│       ├── schema.py
+│       ├── pdf_ingest.py
+│       ├── text_processing.py
+│       ├── extractor.py
+│       ├── confidence.py
+│       ├── model_agreement.py
+│       ├── review.py
+│       └── pipeline.py
+├── tests/
+│   ├── fixtures/
+│   │   ├── test_report.pdf
+│   │   └── blank_test.pdf
+│   ├── test_confidence.py
+│   └── test_pdf_ingest.py
 ├── dataset/
-│   └── TCGA_Reports.csv              # gitignored, fetch separately
-├── results/                           # gitignored, generated outputs
-│   ├── <model_name>/
-│   │   ├── extraction/
-│   │   │   ├── failed_extractions.csv
-│   │   │   └── <patient_id>.json
-│   │   ├── review/
-│   │   │   ├── review_queue_all.csv
-│   │   │   └── review_queue_field_level.csv
-│   │   └── validation/
-│   │       ├── validation_overview.csv
-│   │       └── field_results.csv
-│   └── model_agreement.csv
-├── test_fixtures/
-│   ├── blank_test.pdf
-│   └── test_report.pdf
-├── .gitignore
-├── config.py
-├── extraction.py
-├── model_agreement.py
-├── pdf_ingestion.py
-├── pipeline.py
+├── results/
+├── pyproject.toml
 ├── README.md
-├── requirements.txt
-├── review.py
-├── schema.py
-├── validation.py
-└── text_processing.py
+└── .gitignore
 ```
 
 ## Roadmap

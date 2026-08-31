@@ -4,12 +4,11 @@ import logging
 from pathlib import Path
 
 import pandas as pd
-
-from config import LOG_LEVEL, MODELS, RAND_SEED, RAND_SUBSET, REPORTS_FP, RESULTS_DIR
-from extraction import run_extraction
-from model_agreement import run_model_agreement
-from review import generate_field_level_review, generate_overall_review
-from validation import run_confidence_validation
+from pathology_extraction.config import LOG_LEVEL, MODELS, RAND_SEED, RAND_SUBSET, REPORTS_FP, RESULTS_DIR
+from pathology_extraction.extraction import run_extraction
+from pathology_extraction.model_agreement import run_model_agreement
+from pathology_extraction.review import generate_field_level_review, generate_overall_review
+from pathology_extraction.validation import run_confidence_validation
 
 logging.basicConfig(level=LOG_LEVEL, format="%(message)s")
 logger = logging.getLogger(__name__)
@@ -45,7 +44,8 @@ def run_model_extraction(reports_df: pd.DataFrame, model_config: dict) -> None:
     # Evaluate and save failed extractions
     if failed_extractions is not None:
         logger.info(
-            f"\n{model_config['name']} failed: {len(failed_extractions)} / {RAND_SUBSET}"
+            f"\n{model_config['name']} failed: "
+            f"{len(failed_extractions)} / {RAND_SUBSET}"
         )
 
     failed_extractions_df = pd.DataFrame(failed_extractions)
@@ -108,8 +108,8 @@ def main() -> None:
         logger.error(
             f"Dataset not found at {REPORTS_FP}. "
             "Download TCGA_Reports.csv.zip from "
-            "https://github.com/tatonetti-lab/tcga-path-reports and unzip it into dataset/. "
-            "See README.md for details."
+            "https://github.com/tatonetti-lab/tcga-path-reports and " \
+            "unzip it into dataset/. See README.md for details."
         )
 
     # Run extraction pipeline for each model
@@ -124,12 +124,13 @@ def main() -> None:
         index=False,
     )
 
-    # Run validation per model and review queue (based on each model and agreement across models)
+    # Run validation per model and review queue 
     for model_name, model_config in MODELS.items():
         extraction_files, failed_extractions_df = extraction_results[model_name]
         validation_overview, field_results_df = run_model_validation(
             reports_df, model_config, extraction_files
         )
+        # Review based on each model and agreement across models
         run_model_review(
             model_config,
             validation_overview,

@@ -5,9 +5,8 @@ from collections import Counter
 from pathlib import Path
 
 import pandas as pd
-
-from schema import PathologyExtraction
-from text_processing import normalize_string
+from pathology_extraction.schema import PathologyExtraction
+from pathology_extraction.text_processing import normalize_string
 
 logger = logging.getLogger(__name__)
 

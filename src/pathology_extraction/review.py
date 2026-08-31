@@ -3,8 +3,7 @@
 import re
 
 import pandas as pd
-
-from config import (
+from pathology_extraction.config import (
     COMPOSITE_SCORE_TH,
     EVIDENCE_REPORT_GROUNDING_TH,
     MAX_ERROR_MSG_LEN,
