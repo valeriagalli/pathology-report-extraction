@@ -27,6 +27,11 @@ Install the project:
 pip install -r requirements.txt
 ```
 
+For development (linting, tests): 
+```powershell
+pip install -r requirements_dev.txt
+```
+
 ## Dataset
 
 Download TCGA_Reports.csv.zip from https://github.com/tatonetti-lab/tcga-path-reports and unzip it into dataset/. 
@@ -135,14 +140,14 @@ pathology-report-extraction/
 - [x] Extraction schema
 - [x] LLM extraction agent (direct Groq API)
 - [x] Validation and human-in-the-loop review
-- [x] End-to-end pipeline over TCGA-Reports dataset
-- [ ] Unit test coverage
+- [x] End-to-end pipeline over TCGA-Reports datasetgit li
 
 ### v0.2 — Multi-model extraction
 - [x] Multi-model extraction support
 - [x] Cross-model agreement analysis
 - [x] Composite confidence score
 - [x] Integrate model agreement into review workflow
+- [ ] Unit test coverage
 
 
 ## Status
