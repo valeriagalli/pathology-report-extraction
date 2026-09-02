@@ -30,8 +30,8 @@ pip install -e ".[dev]"
 Note: dependencies use minimum version bounds rather than exact pins, since this is a demonstration project rather than a deployed service
 
 ## Dataset
-
-Download TCGA_Reports.csv.zip from https://github.com/tatonetti-lab/tcga-path-reports and unzip it into dataset/. 
+Create a `dataset/` folder in the project root if it doesn't exist.
+Download TCGA_Reports.csv.zip from https://github.com/tatonetti-lab/tcga-path-reports and unzip it into `dataset/`. 
 This is a pre-cleaned version of TCGA pathology reports (Kefeli & Tatonetti, 2024, Patterns), originally scanned PDFs, processed via AWS Textract (optical character recognition)
 
 ## Usage
@@ -44,7 +44,7 @@ $env:GROQ_API_KEY = "your-key-here"
 Run the full pipeline:
 
 ```powershell
-python pipeline.py
+python -m pathology_extraction.pipeline
 ```
 
 This will, for each model configured in `config.py` (`MODELS`):
@@ -61,73 +61,49 @@ To adjust the sample size or which models are compared, edit `RAND_SUBSET` and `
 
 ### Running the API
 
-Start the server:
+Terminal 1, start the server:
 ```powershell
+.venv\Scripts\Activate.ps1
+$env:GROQ_API_KEY = "your-key-here"
 uvicorn pathology_extraction.api:app --reload
 ```
 
-Interactive docs are available at `http://127.0.0.1:8000/docs`, where you can test the `/extract` endpoint directly.
-
-Example request:
-```python
-import requests
-
-response = requests.post(
-    "http://127.0.0.1:8000/extract",
-    json={"report_text": "your report text here"},
-)
-print(response.json())
+Terminal 2, test it with a real report:
+```powershell
+.venv\Scripts\Activate.ps1
+python examples/call_api.py
 ```
 
-The endpoint returns extracted fields (diagnosis, tumor site, grade, stage, margins) each paired with a confidence score based on evidence grounding and value/evidence consistency. Note this uses a single model (no cross-model agreement), since agreement requires comparing multiple models' output, which isn't meaningful for a single synchronous request.
+The endpoint returns extracted fields (diagnosis, tumor site, grade, stage, margins) each paired with a confidence score based on evidence grounding and value/evidence consistency.
+Note this uses a single model (no cross-model agreement), since agreement requires comparing multiple models' output, which isn't meaningful for a single synchronous request.
+
+For quick exploration of the endpoint (schema, simple manual tests), visit `http://127.0.0.1:8000/docs`.
+Note: testing `/extract` with real report text through the `/docs` UI requires manually escaping newlines in the pasted JSON; `examples/call_api.py` is the recommended way to test with real data.
 
 
 ## Features
 
-- **Structured extraction**: pulls diagnosis, tumor site, grade, stage, and margin status from unstructured pathology report text using an LLM (Groq API), with each field paired with a verbatim source quote as evidence.
-- **Grounding-based confidence, not self-reported**: each extraction is checked for whether its cited evidence actually appears in the source report (lexical + semantic matching), and whether the extracted value is consistent with its own evidence.
-- **Composite confidence score**: combines grounding and value/evidence consistency into one configurable, weighted score per field. Weights are configurable parameters (e.g., to be set by domain experts like Clinical Informatics Lead).
-- **Human-in-the-loop review queues**: two-tier review output: a report-level triage list with plain-language reasons for review, and a field-level detail view for drilling into flagged cases.
-- **Multi-model comparison and agreement analysis**: runs extraction through two independent models and flags fields where they disagree. More models are possible depending on availability.
-- **PDF text ingestion**: a separate utility (`pdf_ingest.py`) for extracting text from text-based PDF pathology reports, for cases where input isn't already available as clean CSV text.
-- **REST API**: a FastAPI wrapper exposing extraction and confidence scoring as a `/extract` endpoint, so the pipeline can be called by other services rather than only run as a batch script.
-
-## Limitations
-
-**Confidence calibration is based on a small, manually-reviewed sample, not a labeled dataset.**
-There's no ground-truth-labeled version of this corpus to compute precision/recall against. Thresholds (e.g. `VALUE_EVIDENCE_SIMILARITY_TH`, `EVIDENCE_SEMANTIC_SIMILARITY_TH`) were set by manually inspecting a small number of real extractions and judging faithfulness by eye, not by statistical calibration against a larger labeled set. With more time, this would need a proper annotated validation set.
-
-**Composite score weights are placeholders, not clinically validated.**
-The weighting between grounding and value/evidence consistency in the composite score is a reasonable default I chose for demonstration, not a clinically informed decision. In a real deployment, these weights (and what counts as an acceptable threshold) should be set and iterated on by clinical domain experts — e.g. a Clinical Informatics Lead, per the role description — not by the engineer building the pipeline.
-
-**Value/evidence matching struggles with short, code-like fields.**
-Semantic embedding similarity works well for free-text fields (diagnosis, tumor site) but performs poorly on short structured tokens like grade/stage codes (e.g. "G3", "pT1"), where exact or near-exact character matching is actually more reliable. The current implementation uses hybrid lexical+semantic.
-
-**Cross-model agreement doesn't resolve disagreement, it surfaces it.**
-When two models disagree on a field, the system doesn't attempt to pick a "winner" based on composite score — a self-consistency measure isn't a reliable arbiter of correctness across models. Disagreement is treated as its own review trigger, with both values shown to the human reviewer.
-
-**Structured-output reliability varies significantly by model.**
-`openai/gpt-oss-120b` reliably supports strict JSON-schema enforcement. During development, `qwen/qwen3.6-27b` (a Groq preview model) failed structured-output validation entirely under the same schema, succeeding on short reports but failing on longer, more complex ones — this became a data point about model selection, not just an obstacle.
-
-**No deployment.**
-Given the one-week scope, this was built and validated as a local pipeline, not deployed. The natural next step would be a lightweight FastAPI wrapper exposing an endpoint that accepts report text and returns extraction + confidence output, deployed on a small Lambda or Cloud Run instance. Deliberately out of scope this week in favor of extraction accuracy and confidence-scoring rigor.
-
-**Limited unit test coverage.**
-Not yet implemented, given time constraints.
-
-**Uses a pre-cleaned, OCR'd dataset rather than raw PDFs.**
-Raw TCGA pathology reports are only available as scanned PDF images; this project uses TCGA-Reports (Kefeli & Tatonetti, 2024), an already-OCR'd, published version, so that development time went toward extraction and confidence logic rather than re-solving OCR. A separate PDF text-ingestion utility (`pdf_ingest.py`) is included for text-based (non-scanned) PDF input.
+- **Structured extraction**: pulls predefined fields from unstructured pathology report text using an LLM (Groq API), with each field paired with a verbatim source quote as evidence.
+- **Grounding-based confidence, not self-reported**: each extraction is checked for whether its cited evidence actually appears in the source report, and whether the extracted value is consistent with its own evidence.
+- **Composite confidence score**: combines grounding, value/evidence consistency, and cross-model agreement into one weighted score per field. 
+- **Human-in-the-loop review queues**: a report-level sorted list of extractions that need reviewing and a field-level detail view.
+- **Multi-model comparison and agreement analysis**: runs extraction through multiple models and flags fields where they disagree.
+- **PDF text ingestion**: a standalone utility for extracting text from text-based PDF pathology reports, for input not already available as clean text.
+- **REST API**: a FastAPI wrapper exposing extraction and confidence scoring as a `/extract` endpoint.
 
 
 ## Project structure
 ```text
 pathology-report-extraction/
 ├── dataset/
+├── docs/
+│   └── limitations.md
+│   ├── roadmap.md
 ├── results/
 ├── src/
 │   └── pathology_extraction/
-│       ├── api.py
 │       ├── __init__.py
+│       ├── api.py
 │       ├── config.py
 │       ├── extraction.py
 │       ├── model_agreement.py
@@ -149,28 +125,12 @@ pathology-report-extraction/
 └── README.md
 ```
 
-## Roadmap
-
-### v0.1 — Single-model extraction
-- [x] PDF text ingestion
-- [x] Extraction schema
-- [x] LLM extraction agent (direct Groq API)
-- [x] Validation and human-in-the-loop review
-- [x] End-to-end pipeline over TCGA-Reports datasetgit li
-
-### v0.2 — Multi-model extraction
-- [x] Multi-model extraction support
-- [x] Cross-model agreement analysis
-- [x] Composite confidence score
-- [x] Integrate model agreement into review workflow
-- [x] Partial unit test coverage
-
-### v0.3 — Packaging and deployment (planned)
-- [x] Restructure to src/ layout with pyproject.toml
-- [ ] FastAPI wrapper exposing extraction + confidence as an endpoint
-- [ ] Deploy to Cloud Run or AWS Lambda
-
 
 ## Status
-Functional end-to-end pipeline: extraction, confidence scoring, and human-review queues working across two models. 
-Partial unit test coverage (in progress). 
+Core validation, scoring, and API logic covered by unit tests; orchestration and LLM-calling code intentionally untested.
+
+
+## Documentation
+
+- [Limitations and design tradeoffs](docs/limitations.md)
+- [Project roadmap](docs/roadmap.md)
