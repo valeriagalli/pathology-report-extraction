@@ -1,9 +1,17 @@
 """
-Test module for the validation module.
+Test suite for the validation module.
 """
 
+from pathology_extraction.config import (
+    EVIDENCE_SEMANTIC_SIMILARITY_TH,
+    VALUE_EVIDENCE_SIMILARITY_TH,
+)
 from pathology_extraction.schema import ExtractedField, PathologyExtraction
-from pathology_extraction.validation import validate_extraction_completeness
+from pathology_extraction.validation import (
+    validate_extraction_completeness,
+    validate_field_evidence,
+    validate_field_value,
+)
 
 
 def test_partial_evidence_coverage():
@@ -47,3 +55,37 @@ def test_full_completeness_and_coverage():
     field_completeness, evidence_coverage = validate_extraction_completeness(report)
     assert field_completeness == 1.0
     assert evidence_coverage == 1.0
+
+
+def test_validate_field_value_pass(well_grounded_report):
+    similarity_score, passed = validate_field_value(
+        well_grounded_report.diagnosis.value, well_grounded_report.diagnosis.evidence
+    )
+    assert similarity_score == 1.0
+    assert passed is True
+
+
+def test_validate_field_value_not_pass(non_grounded_report):
+    similarity_score, passed = validate_field_value(
+        non_grounded_report.tumor_site.value, non_grounded_report.tumor_site.evidence
+    )
+    assert similarity_score < VALUE_EVIDENCE_SIMILARITY_TH
+    assert passed is False
+
+
+def test_validate_evidence_grounding(non_grounded_report, non_grounded_report_raw_text):
+    _, semantic_match_score, passed = validate_field_evidence(
+        non_grounded_report.stage.evidence, non_grounded_report_raw_text
+    )
+    assert semantic_match_score > EVIDENCE_SEMANTIC_SIMILARITY_TH
+    assert passed is True
+
+
+def test_validate_no_evidence_grounding(
+    non_grounded_report, non_grounded_report_raw_text
+):
+    _, semantic_match_score, passed = validate_field_evidence(
+        non_grounded_report.margins.evidence, non_grounded_report_raw_text
+    )
+    assert semantic_match_score < EVIDENCE_SEMANTIC_SIMILARITY_TH
+    assert passed is False
