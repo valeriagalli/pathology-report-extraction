@@ -1,11 +1,12 @@
 """
 FastAPI module to expose the pathology report extraction.
 """
+import pandas as pd
 
 from fastapi import FastAPI
 from pydantic import BaseModel
 
-from pathology_extraction.config import MODELS
+from pathology_extraction.config import MODELS, REPORTS_FP
 from pathology_extraction.extraction import build_extractor
 from pathology_extraction.schema import PathologyExtraction
 from pathology_extraction.validation import validate_field_value, validate_field_evidence
