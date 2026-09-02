@@ -6,10 +6,9 @@ import pandas as pd
 
 from pathology_extraction.config import (
     COMPOSITE_SCORE_TH,
-    EVIDENCE_REPORT_GROUNDING_TH,
+    DEFAULT_WEIGHTS,
     MAX_ERROR_MSG_LEN,
     MODEL_AGREEMENT_TH,
-    VALUE_EVIDENCE_CONSISTENCY_TH,
 )
 
 
@@ -43,64 +42,94 @@ def get_clean_error(e: object, max_len: int = MAX_ERROR_MSG_LEN) -> str:
 def build_review_reason(row: pd.Series) -> str:
     """Return a string explaining the reason for human review based on the issue."""
     reasons = []
-    if pd.notna(row["failed_extraction"]):
-        reasons.append("extraction failed")
     if row["value_evidence_inconsistency"]:
         reasons.append("value/evidence mismatch")
     if row["evidence_grounding_missing"]:
         reasons.append("evidence not grounded")
     if row["low_composite_score"]:
         reasons.append("low composite confidence score")
+    if row["model_disagreement"]:
+        reasons.append("model disagreement")
     return "; ".join(reasons)
 
 
+def compute_field_composite_score(
+    field_result: dict, agreement: float | None = None, weights: dict = DEFAULT_WEIGHTS
+) -> float | None:
+    grounding_score = field_result.get("evidence_semantic_score")
+    value_score = field_result.get("value_evidence_score")
+    if grounding_score is None or value_score is None:
+        return None
+
+    if agreement is not None:
+        return (
+            weights["evidence_grounding"] * grounding_score
+            + weights["value_evidence_consistency"] * value_score
+            + weights["model_agreement"] * agreement
+        )
+    # Fallback: no agreement data available, rescale remaining two weights
+    total = weights["evidence_grounding"] + weights["value_evidence_consistency"]
+    return (weights["evidence_grounding"] / total) * grounding_score + (
+        weights["value_evidence_consistency"] / total
+    ) * value_score
+
+
+def compute_report_composite_score(
+    report_id, field_level_review_df: pd.DataFrame
+) -> float | None:
+    """Compute the composite score for a report based on its field results.
+
+    Args:
+        field_level_review_df: DataFrame containing field-level review queue results.
+        report_id: The ID of the report for which to compute the composite score.
+
+    Returns:
+        The composite score for the report, None if no valid field scores are available.
+    """
+
+    valid_scores = field_level_review_df[
+        field_level_review_df["report_id"] == report_id
+    ]["composite_score"].dropna()
+    if not valid_scores.empty:
+        return valid_scores.mean()
+    return None
+
+
 def generate_overall_review(
-    validation_overview: pd.DataFrame,
+    field_level_review_df: pd.DataFrame,
     failed_extractions: pd.DataFrame | None,
-    agreement_df: pd.DataFrame | None = None,
-    agreement_th: float = MODEL_AGREEMENT_TH,
 ) -> pd.DataFrame:
     """Build a review queue from failed extractions and low-confidence results.
 
     Args:
-        validation_overview: Per-report confidence metrics.
+        field_level_review_df: DataFrame containing field-level review queue results.
         failed_extractions: Extraction failures with ``report_id`` and ``error`` keys.
-        agreement_df: Field based model agreement.
-        agreement_th: Threshold for model agreement acceptance.
 
     Returns:
         A DataFrame containing review flags for each affected report.
     """
-    # Base queue from validation overview
-    if validation_overview is not None and not validation_overview.empty:
-        review_queue_df = pd.DataFrame(
-            {
-                "report_id": validation_overview["report_id"],
-                "failed_extraction": None,
-                "value_evidence_inconsistency": (
-                    validation_overview["value_evidence_consistency"]
-                    < VALUE_EVIDENCE_CONSISTENCY_TH
-                ),
-                "evidence_grounding_missing": (
-                    validation_overview["evidence_report_grounding"]
-                    < EVIDENCE_REPORT_GROUNDING_TH
-                ),
-                "low_composite_score": (
-                    validation_overview["composite_score"] < COMPOSITE_SCORE_TH
-                ),
-            }
-        )
-    else:
-        review_queue_df = pd.DataFrame(
-            columns=[
-                "report_id",
-                "failed_extraction",
-                "value_evidence_inconsistency",
-                "evidence_grounding_missing",
-                "low_composite_score",
-                "model_disagreement",
-            ]
-        )
+    grouped = field_level_review_df.groupby("report_id")
+
+    composite_score = grouped["composite_score"].mean()
+    low_composite_score = composite_score < COMPOSITE_SCORE_TH
+    value_evidence_inconsistency = grouped["value_evidence_pass"].apply(
+        lambda s: (~s).any()
+    )
+    evidence_grounding_missing = grouped["evidence_grounding_pass"].apply(
+        lambda s: (~s).any()
+    )
+    model_disagreement = grouped["model_disagreement"].any()
+
+    review_queue_df = pd.DataFrame(
+        {
+            "report_id": composite_score.index,
+            "failed_extraction": None,
+            "value_evidence_inconsistency": value_evidence_inconsistency.values,
+            "evidence_grounding_missing": evidence_grounding_missing.values,
+            "low_composite_score": low_composite_score.values,
+            "model_disagreement": model_disagreement.values,
+        }
+    )
 
     # Update existing rows / Add missing rows from failed_extractions
     if failed_extractions is not None and not failed_extractions.empty:
@@ -117,47 +146,63 @@ def generate_overall_review(
         ].fillna(review_queue_df["error"])
         review_queue_df.drop(columns=["error"], inplace=True)
 
-        # Fill boolean flags for reports that failed completely
-        review_queue_df["value_evidence_inconsistency"] = review_queue_df[
-            "value_evidence_inconsistency"
-        ].fillna(False)
-        review_queue_df["evidence_grounding_missing"] = review_queue_df[
-            "evidence_grounding_missing"
-        ].fillna(False)
-
-    # Model agreement
-    low_agreement_report_ids = set(
-        agreement_df.loc[agreement_df["agreement"] < agreement_th, "report_id"]
-    )
-    review_queue_df["model_disagreement"] = review_queue_df["report_id"].isin(
-        low_agreement_report_ids
-    )
-
     # Filter out report ids that do not need review
     review_queue_df = review_queue_df[
         review_queue_df["failed_extraction"].notna()
         | review_queue_df["value_evidence_inconsistency"]
         | review_queue_df["evidence_grounding_missing"]
+        | review_queue_df["low_composite_score"]
         | review_queue_df["model_disagreement"]
     ]
 
     review_queue_df["review_reason"] = review_queue_df.apply(
         build_review_reason, axis=1
     )
-    return review_queue_df[
-        ["report_id", "review_reason", "failed_extraction", "model_disagreement"]
-    ]
+
+    review_queue_df["composite_score_mean"] = composite_score.reindex(
+        review_queue_df["report_id"]
+    ).values.round(2)
+    review_queue_df["composite_score_min"] = (
+        grouped["composite_score"]
+        .min()
+        .reindex(review_queue_df["report_id"])
+        .values.round(2)
+    )
+    review_queue_df["failed_extraction"] = (
+        review_queue_df["failed_extraction"].fillna(False).astype(bool)
+    )
+
+    overview_queue_df = review_queue_df[
+        [
+            "report_id",
+            "failed_extraction",
+            "value_evidence_inconsistency",
+            "evidence_grounding_missing",
+            "low_composite_score",
+            "model_disagreement",
+            "composite_score_min",
+        ]
+    ].sort_values("composite_score_min")
+
+    print(
+        review_queue_df[
+            [
+                "value_evidence_inconsistency",
+                "evidence_grounding_missing",
+                "low_composite_score",
+                "model_disagreement",
+            ]
+        ].corr()
+    )
+    return overview_queue_df
 
 
 def generate_field_level_review(
     field_results_df: pd.DataFrame,
-    review_queue_df: pd.DataFrame,
     agreement_df: pd.DataFrame | None = None,
     agreement_th: float = MODEL_AGREEMENT_TH,
 ) -> pd.DataFrame:
-    field_level_review_df = field_results_df[
-        field_results_df["report_id"].isin(review_queue_df["report_id"])
-    ].copy()
+    field_level_review_df = field_results_df.copy()
 
     if agreement_df is not None and not agreement_df.empty:
         field_level_review_df = field_level_review_df.merge(
@@ -170,5 +215,9 @@ def generate_field_level_review(
         )
     else:
         field_level_review_df["model_disagreement"] = False
+
+    field_level_review_df["composite_score"] = field_level_review_df.apply(
+        lambda row: compute_field_composite_score(row, row["agreement"]), axis=1
+    )
 
     return field_level_review_df

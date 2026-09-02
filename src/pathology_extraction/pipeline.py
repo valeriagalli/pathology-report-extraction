@@ -91,7 +91,6 @@ def run_model_validation(
 
 def run_model_review(
     model_config: dict,
-    validation_overview: pd.DataFrame,
     field_results_df: pd.DataFrame,
     failed_extractions_df: pd.DataFrame,
     agreement_df: pd.DataFrame | None,
@@ -100,15 +99,13 @@ def run_model_review(
     review_dir = model_config["review_dir"]
     review_dir.mkdir(parents=True, exist_ok=True)
 
+    review_queue_fields = generate_field_level_review(field_results_df, agreement_df)
+    review_queue_fields.to_csv(review_dir / "review_queue_field_level.csv", index=False)
+
     review_queue_all = generate_overall_review(
-        validation_overview, failed_extractions_df, agreement_df
+        review_queue_fields, failed_extractions_df
     )
     review_queue_all.to_csv(review_dir / "review_queue_all.csv", index=False)
-
-    review_queue_fields = generate_field_level_review(
-        field_results_df, review_queue_all, agreement_df
-    )
-    review_queue_fields.to_csv(review_dir / "review_queue_field_level.csv", index=False)
 
 
 def main() -> None:
@@ -144,7 +141,6 @@ def main() -> None:
         # Review based on each model and agreement across models
         run_model_review(
             model_config,
-            validation_overview,
             field_results_df,
             failed_extractions_df,
             agreement_df,

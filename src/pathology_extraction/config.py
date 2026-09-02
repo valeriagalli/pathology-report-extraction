@@ -19,7 +19,7 @@ RESULTS_DIR = ROOT_DIR / "results"
 # ---------------------------------------------------------------------------
 # Pipeline
 # ---------------------------------------------------------------------------
-RAND_SUBSET = 10
+RAND_SUBSET = 20
 RAND_SEED = 42
 
 # ---------------------------------------------------------------------------
@@ -140,7 +140,7 @@ DEFAULT_WEIGHTS = {
 EVIDENCE_REPORT_GROUNDING_TH = 0.70
 MODEL_AGREEMENT_TH = 0.75
 VALUE_EVIDENCE_CONSISTENCY_TH = 0.70
-COMPOSITE_SCORE_TH = 0.60
+COMPOSITE_SCORE_TH = 0.80
 
 # ---------------------------------------------------------------------------
 # Settings for logging

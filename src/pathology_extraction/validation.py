@@ -8,7 +8,6 @@ import pandas as pd
 from sentence_transformers import util
 
 from pathology_extraction.config import (
-    DEFAULT_WEIGHTS,
     EVIDENCE_SEMANTIC_SIMILARITY_TH,
     STR_EMBEDDING_MODEL,
     VALUE_EVIDENCE_SIMILARITY_TH,
@@ -261,12 +260,11 @@ def validate_extraction(
             continue
 
         field_result = validate_field(field_name, extracted_field, report_raw_clean)
-        composite_score = compute_field_composite_score(field_result)
+
         record = {
             "report_id": report_id,
             "field_name": field_name,
             **field_result,
-            "composite_score": composite_score,
         }
         field_results_list.append(record)
 
@@ -290,21 +288,12 @@ def validate_extraction(
         else 0.0
     )
 
-    # Composite score as average of the per-field composite scores
-    report_composite_score = (
-        sum(r["composite_score"] for r in field_results_list)
-        / fields_with_value_and_evidence
-        if fields_with_value_and_evidence
-        else 0.0
-    )
-
     validation_result = {
         "report_id": report_id,
         "field_coverage": field_coverage,
         "evidence_coverage": evidence_coverage,
         "value_evidence_consistency": value_evidence_consistency,
         "evidence_report_grounding": evidence_report_grounding,
-        "composite_score": report_composite_score,
     }
 
     logger.debug("\nValidation results overview")
@@ -312,16 +301,6 @@ def validate_extraction(
         logger.debug(f"{key}\t{item}")
 
     return validation_result, field_results_list
-
-
-def compute_field_composite_score(field_result, weights=DEFAULT_WEIGHTS):
-    """Compute composite confidence score based on default weights."""
-    grounding_score = field_result["evidence_semantic_score"]
-    value_score = field_result["value_evidence_score"]
-    return (
-        weights["evidence_grounding"] * grounding_score
-        + weights["value_evidence_consistency"] * value_score
-    )
 
 
 def run_confidence_validation(
