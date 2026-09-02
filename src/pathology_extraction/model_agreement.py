@@ -5,6 +5,7 @@ from collections import Counter
 from pathlib import Path
 
 import pandas as pd
+
 from pathology_extraction.schema import PathologyExtraction
 from pathology_extraction.text_processing import normalize_string
 

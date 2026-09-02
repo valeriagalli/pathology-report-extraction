@@ -35,7 +35,7 @@ Download TCGA_Reports.csv.zip from https://github.com/tatonetti-lab/tcga-path-re
 This is a pre-cleaned version of TCGA pathology reports (Kefeli & Tatonetti, 2024, Patterns), originally scanned PDFs, processed via AWS Textract (optical character recognition)
 
 ## Usage
-Set your Groq API key (get one at console.groq.com, no credit card required):
+Set your Groq API key (get one at console.groq.com free of charge):
 
 ```powershell
 $env:GROQ_API_KEY = "your-key-here"

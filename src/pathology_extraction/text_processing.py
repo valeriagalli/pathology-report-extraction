@@ -4,7 +4,13 @@ import logging
 import re
 
 import pandas as pd
-from pathology_extraction.config import DATA_DIR, MAX_SEGMENT_LEN, MIN_TEXT_LEN, REPORTS_FP
+
+from pathology_extraction.config import (
+    DATA_DIR,
+    MAX_SEGMENT_LEN,
+    MIN_TEXT_LEN,
+    REPORTS_FP,
+)
 
 logger = logging.getLogger(__name__)
 

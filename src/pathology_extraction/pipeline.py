@@ -4,10 +4,21 @@ import logging
 from pathlib import Path
 
 import pandas as pd
-from pathology_extraction.config import LOG_LEVEL, MODELS, RAND_SEED, RAND_SUBSET, REPORTS_FP, RESULTS_DIR
+
+from pathology_extraction.config import (
+    LOG_LEVEL,
+    MODELS,
+    RAND_SEED,
+    RAND_SUBSET,
+    REPORTS_FP,
+    RESULTS_DIR,
+)
 from pathology_extraction.extraction import run_extraction
 from pathology_extraction.model_agreement import run_model_agreement
-from pathology_extraction.review import generate_field_level_review, generate_overall_review
+from pathology_extraction.review import (
+    generate_field_level_review,
+    generate_overall_review,
+)
 from pathology_extraction.validation import run_confidence_validation
 
 logging.basicConfig(level=LOG_LEVEL, format="%(message)s")
@@ -108,7 +119,7 @@ def main() -> None:
         logger.error(
             f"Dataset not found at {REPORTS_FP}. "
             "Download TCGA_Reports.csv.zip from "
-            "https://github.com/tatonetti-lab/tcga-path-reports and " \
+            "https://github.com/tatonetti-lab/tcga-path-reports and "
             "unzip it into dataset/. See README.md for details."
         )
 
@@ -124,7 +135,7 @@ def main() -> None:
         index=False,
     )
 
-    # Run validation per model and review queue 
+    # Run validation per model and review queue
     for model_name, model_config in MODELS.items():
         extraction_files, failed_extractions_df = extraction_results[model_name]
         validation_overview, field_results_df = run_model_validation(

@@ -1,13 +1,16 @@
 [project]
-name = "job-radar"
-version = "0.1.0"
-description = "CLI tool to streamline healthcare software job searches"
+name = "pathology-extraction"
+version = "0.2.0"
+description = "Structured field extraction from unstructured pathology reports"
 readme = "README.md"
 requires-python = ">=3.12"
 
 dependencies = [
-    "PyYAML>=6.0",
-    "requests>=2.32,<3",
+    "groq>=0.9",
+    "pandas>=2.0",
+    "pdfplumber>=0.10",
+    "pydantic>=2.0",
+    "sentence-transformers>=3.0",
 ]
 
 [project.optional-dependencies]
@@ -15,9 +18,6 @@ dev = [
     "pytest>=8.0",
     "ruff>=0.12",
 ]
-
-[project.scripts]
-job-radar = "job_radar.cli:main"
 
 [tool.ruff]
 line-length = 88
@@ -34,4 +34,3 @@ extend-select = [
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
-

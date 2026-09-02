@@ -3,8 +3,9 @@
 import logging
 from pathlib import Path
 
-from pathology_extraction.schema import PathologyExtraction
 from sentence_transformers import SentenceTransformer
+
+from pathology_extraction.schema import PathologyExtraction
 
 # ---------------------------------------------------------------------------
 # Paths

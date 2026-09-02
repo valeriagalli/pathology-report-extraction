@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pandas as pd
 from groq import Groq
+
 from pathology_extraction.review import get_clean_error
 from pathology_extraction.schema import PathologyExtraction
 

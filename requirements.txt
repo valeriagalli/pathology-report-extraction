@@ -1,5 +1,0 @@
-groq
-pandas
-pdfplumber
-pydantic
-sentence_transformers
