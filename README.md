@@ -59,6 +59,28 @@ All outputs are written under `results/<model_name>/` and `results/model_agreeme
 
 To adjust the sample size or which models are compared, edit `RAND_SUBSET` and `MODELS` in `config.py`.
 
+### Running the API
+
+Start the server:
+```powershell
+uvicorn pathology_extraction.api:app --reload
+```
+
+Interactive docs are available at `http://127.0.0.1:8000/docs`, where you can test the `/extract` endpoint directly.
+
+Example request:
+```python
+import requests
+
+response = requests.post(
+    "http://127.0.0.1:8000/extract",
+    json={"report_text": "your report text here"},
+)
+print(response.json())
+```
+
+The endpoint returns extracted fields (diagnosis, tumor site, grade, stage, margins) each paired with a confidence score based on evidence grounding and value/evidence consistency. Note this uses a single model (no cross-model agreement), since agreement requires comparing multiple models' output, which isn't meaningful for a single synchronous request.
+
 
 ## Features
 
@@ -68,6 +90,7 @@ To adjust the sample size or which models are compared, edit `RAND_SUBSET` and `
 - **Human-in-the-loop review queues**: two-tier review output: a report-level triage list with plain-language reasons for review, and a field-level detail view for drilling into flagged cases.
 - **Multi-model comparison and agreement analysis**: runs extraction through two independent models and flags fields where they disagree. More models are possible depending on availability.
 - **PDF text ingestion**: a separate utility (`pdf_ingest.py`) for extracting text from text-based PDF pathology reports, for cases where input isn't already available as clean CSV text.
+- **REST API**: a FastAPI wrapper exposing extraction and confidence scoring as a `/extract` endpoint, so the pipeline can be called by other services rather than only run as a batch script.
 
 ## Limitations
 
@@ -103,6 +126,7 @@ pathology-report-extraction/
 ├── results/
 ├── src/
 │   └── pathology_extraction/
+│       ├── api.py
 │       ├── __init__.py
 │       ├── config.py
 │       ├── extraction.py
@@ -117,6 +141,7 @@ pathology-report-extraction/
 │   ├── fixtures/
 │   │   ├── blank_test.pdf
 │   │   └── test_report.pdf
+│   ├── test_api.py
 │   ├── test_review.py
 │   └── test_validation.py
 ├── .gitignore
