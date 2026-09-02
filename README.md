@@ -99,29 +99,29 @@ Raw TCGA pathology reports are only available as scanned PDF images; this projec
 ## Project structure
 ```text
 pathology-report-extraction/
+├── dataset/
+├── results/
 ├── src/
 │   └── pathology_extraction/
 │       ├── __init__.py
 │       ├── config.py
-│       ├── schema.py
-│       ├── pdf_ingest.py
-│       ├── text_processing.py
-│       ├── extractor.py
-│       ├── confidence.py
+│       ├── extraction.py
 │       ├── model_agreement.py
+│       ├── pdf_ingest.py
+│       ├── pipeline.py
 │       ├── review.py
-│       └── pipeline.py
+│       ├── schema.py
+│       ├── text_processing.py
+│       └── validation.py
 ├── tests/
 │   ├── fixtures/
-│   │   ├── test_report.pdf
-│   │   └── blank_test.pdf
-│   ├── test_confidence.py
-│   └── test_pdf_ingest.py
-├── dataset/
-├── results/
+│   │   ├── blank_test.pdf
+│   │   └── test_report.pdf
+│   ├── test_review.py
+│   └── test_validation.py
+├── .gitignore
 ├── pyproject.toml
-├── README.md
-└── .gitignore
+└── README.md
 ```
 
 ## Roadmap
@@ -138,9 +138,14 @@ pathology-report-extraction/
 - [x] Cross-model agreement analysis
 - [x] Composite confidence score
 - [x] Integrate model agreement into review workflow
-- [ ] Unit test coverage
+- [x] Partial unit test coverage
+
+### v0.3 — Packaging and deployment (planned)
+- [x] Restructure to src/ layout with pyproject.toml
+- [ ] FastAPI wrapper exposing extraction + confidence as an endpoint
+- [ ] Deploy to Cloud Run or AWS Lambda
 
 
 ## Status
 Functional end-to-end pipeline: extraction, confidence scoring, and human-review queues working across two models. 
-Unit tests and model-agreement review integration in progress.
+Partial unit test coverage (in progress). 
