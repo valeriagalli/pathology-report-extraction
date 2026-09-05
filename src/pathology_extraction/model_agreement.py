@@ -7,7 +7,7 @@ from pathlib import Path
 import pandas as pd
 
 from pathology_extraction.schema import PathologyExtraction
-from pathology_extraction.text_processing import normalize_string
+from pathology_extraction.text_processing import normalize_string_for_agreement
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +40,7 @@ def calculate_field_agreement(
 
     for field in PathologyExtraction.model_fields:
         values = [
-            normalize_string(getattr(result, field).value)
+            normalize_string_for_agreement(getattr(result, field).value)
             if getattr(result, field).value is not None
             else None
             for result in model_results
