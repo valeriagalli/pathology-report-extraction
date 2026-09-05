@@ -54,7 +54,7 @@ def non_grounded_report():
         ),
         margins=ExtractedField(
             value="Negative",
-            evidence="The limits of resection inked in green appear " \
+            evidence="The limits of resection inked in green appear "
             "microscopically healthy. surgical complete.",
         ),
     )

@@ -2,6 +2,7 @@
 
 import logging
 import re
+import string
 
 import pandas as pd
 
@@ -49,6 +50,13 @@ def normalize_string(text: str) -> str:
     return clean_whitespace(text).casefold()
 
 
+def normalize_string_for_agreement(text: str) -> str:
+    """Normalize text for agreement comparison, stripping trailing punctuation
+    that shouldn't count as a meaningful difference between model outputs."""
+    text = normalize_string(text)
+    return text.rstrip(string.punctuation).strip()
+
+
 def segment_text(text: str, max_length: int = MAX_SEGMENT_LEN) -> list[str]:
     """Group sentence-like units into segments no longer than `max_length`.
 
@@ -77,6 +85,8 @@ def segment_text(text: str, max_length: int = MAX_SEGMENT_LEN) -> list[str]:
 
 
 def run_reports_overview(REPORTS_FP):
+    """Generate an overview of the reports dataset, including counts of
+    periods, characters, text units, and segments."""
     reports_raw_df = pd.read_csv(REPORTS_FP).copy()
     reports_raw_df["n_periods"] = reports_raw_df["text"].str.count(r"\.")
     reports_raw_df["n_characters"] = reports_raw_df["text"].str.len()
