@@ -125,7 +125,7 @@ def main() -> None:
     for model_name, model_config in MODELS.items():
         extraction_results[model_name] = run_model_extraction(reports_df, model_config)
 
-    # Evaluate extrction agreement across models
+    # Evaluate extarction agreement across models
     agreement_df = run_model_agreement(MODELS)
     agreement_df.to_csv(
         RESULTS_DIR / "model_agreement.csv",

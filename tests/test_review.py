@@ -10,6 +10,8 @@ from pathology_extraction.review import (
 
 
 def test_compute_composite_validation_score(field_results):
+    """Test that the composite validation score is computed correctly
+    for a field with multiple models."""
     tumor_site = field_results["tumor_site"]
     composite_score = compute_field_composite_score(
         tumor_site, agreement=tumor_site["agreement"]
@@ -18,12 +20,16 @@ def test_compute_composite_validation_score(field_results):
 
 
 def test_compute_composite_validation_score_no_field(field_results):
+    """Test that the composite validation score is None
+    for a field with no extracted value."""
     grade = field_results["grade"]
     composite_score = compute_field_composite_score(grade, agreement=grade["agreement"])
     assert composite_score is None
 
 
 def test_compute_composite_validation_score_single_model(field_results_single_model):
+    """Test that the composite validation score is computed correctly
+    for a field with only one model's extraction."""
     margins = field_results_single_model["margins"]
     composite_score = compute_field_composite_score(margins, agreement=None)
     assert composite_score == approx(0.31, abs=0.01)

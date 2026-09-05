@@ -1,12 +1,15 @@
 """Example: send a sample report to a running API instance and print the result."""
 
 import sys
-import requests
+
 import pandas as pd
+import requests
+
 from pathology_extraction.config import REPORTS_FP
 
 
 def main():
+    """Send a sample report to the API and print the response."""
     reports_df = pd.read_csv(REPORTS_FP)
     sample_report = reports_df.sample(n=1).iloc[0]["text"]
 

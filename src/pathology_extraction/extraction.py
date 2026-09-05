@@ -10,7 +10,6 @@ from groq import Groq
 from pathology_extraction.review import get_clean_error
 from pathology_extraction.schema import PathologyExtraction
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -29,7 +28,7 @@ def build_extractor(
         A validated `PathologyExtraction` instance.
     """
     client = Groq()
-    
+
     completion = client.chat.completions.create(
         model=model_name,
         messages=[

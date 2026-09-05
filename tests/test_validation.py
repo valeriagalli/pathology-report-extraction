@@ -15,6 +15,8 @@ from pathology_extraction.validation import (
 
 
 def test_partial_evidence_coverage():
+    """Test that the evidence coverage is calculated correctly
+    when some fields have missing evidence."""
     report = PathologyExtraction(
         diagnosis=ExtractedField(value="...", evidence="..."),
         tumor_site=ExtractedField(value="...", evidence="..."),
@@ -32,6 +34,8 @@ def test_partial_evidence_coverage():
 
 
 def test_no_field_value():
+    """Test that the field completeness and evidence coverage are both 0.0
+    when all fields have missing values."""
     report = PathologyExtraction(
         diagnosis=ExtractedField(value=None, evidence=None),
         tumor_site=ExtractedField(value=None, evidence=None),
@@ -45,6 +49,8 @@ def test_no_field_value():
 
 
 def test_full_completeness_and_coverage():
+    """Test that the field completeness and evidence coverage are both 1.0
+    when all fields have values and evidence."""
     report = PathologyExtraction(
         diagnosis=ExtractedField(value="...", evidence="..."),
         tumor_site=ExtractedField(value="...", evidence="..."),
@@ -58,6 +64,8 @@ def test_full_completeness_and_coverage():
 
 
 def test_validate_field_value_pass(well_grounded_report):
+    """Test that the field value validation passes
+    when the value is well-grounded in the evidence."""
     similarity_score, passed = validate_field_value(
         well_grounded_report.diagnosis.value, well_grounded_report.diagnosis.evidence
     )
@@ -66,6 +74,8 @@ def test_validate_field_value_pass(well_grounded_report):
 
 
 def test_validate_field_value_not_pass(non_grounded_report):
+    """Test that the field value validation fails
+    when the value is not grounded in the evidence."""
     similarity_score, passed = validate_field_value(
         non_grounded_report.tumor_site.value, non_grounded_report.tumor_site.evidence
     )
@@ -74,6 +84,8 @@ def test_validate_field_value_not_pass(non_grounded_report):
 
 
 def test_validate_evidence_grounding(non_grounded_report, non_grounded_report_raw_text):
+    """Test that the evidence semantic validation passes
+    when the evidence is well-grounded in the report text."""
     _, semantic_match_score, passed = validate_field_evidence(
         non_grounded_report.stage.evidence, non_grounded_report_raw_text
     )
@@ -84,6 +96,8 @@ def test_validate_evidence_grounding(non_grounded_report, non_grounded_report_ra
 def test_validate_no_evidence_grounding(
     non_grounded_report, non_grounded_report_raw_text
 ):
+    """Test that the evidence semantic validation fails
+    when the evidence is not grounded in the report text."""
     _, semantic_match_score, passed = validate_field_evidence(
         non_grounded_report.margins.evidence, non_grounded_report_raw_text
     )

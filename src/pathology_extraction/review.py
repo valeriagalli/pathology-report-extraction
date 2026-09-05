@@ -56,6 +56,8 @@ def build_review_reason(row: pd.Series) -> str:
 def compute_field_composite_score(
     field_result: dict, agreement: float | None = None, weights: dict = DEFAULT_WEIGHTS
 ) -> float | None:
+    """Compute a composite score for a field based on
+    its grounding, consistency, and agreement."""
     grounding_score = field_result.get("evidence_semantic_score")
     value_score = field_result.get("value_evidence_score")
     if grounding_score is None or value_score is None:
@@ -202,6 +204,7 @@ def generate_field_level_review(
     agreement_df: pd.DataFrame | None = None,
     agreement_th: float = MODEL_AGREEMENT_TH,
 ) -> pd.DataFrame:
+    """Build a field-level review queue from field results and model agreement."""
     field_level_review_df = field_results_df.copy()
 
     if agreement_df is not None and not agreement_df.empty:
