@@ -68,18 +68,19 @@ $env:GROQ_API_KEY = "your-key-here"
 uvicorn pathology_extraction.api:app --reload
 ```
 
-Terminal 2, test it with a real report:
+The endpoint returns extracted fields (diagnosis, tumor site, grade, stage, margins) each paired with a confidence score based on evidence grounding and value/evidence consistency.
+Note this uses a single model (no cross-model agreement), since agreement requires comparing multiple models' output, which isn't meaningful for a single synchronous request.
+
+**Try it in your browser**: visit `http://127.0.0.1:8000/` for a simple web form, paste report text directly and see results, no manual JSON escaping needed.
+
+**Try it with a real dataset sample, from a second terminal**:
 ```powershell
 .venv\Scripts\Activate.ps1
 python examples/call_api.py
 ```
+This pulls a random report from `dataset/TCGA_Reports.csv`, useful for quickly testing without needing your own report text on hand.
 
-The endpoint returns extracted fields (diagnosis, tumor site, grade, stage, margins) each paired with a confidence score based on evidence grounding and value/evidence consistency.
-Note this uses a single model (no cross-model agreement), since agreement requires comparing multiple models' output, which isn't meaningful for a single synchronous request.
-
-For quick exploration of the endpoint (schema, simple manual tests), visit `http://127.0.0.1:8000/docs`.
-Note: testing `/extract` with real report text through the `/docs` UI requires manually escaping newlines in the pasted JSON; `examples/call_api.py` is the recommended way to test with real data.
-
+**Explore the API schema**: visit `http://127.0.0.1:8000/docs` for the full interactive API reference. Note: testing `/extract` with real, multi-line report text directly through the `/docs` UI requires manually escaping newlines in the pasted JSON; the web form at `/` or `examples/call_api.py` are better suited for that.
 
 ## Features
 

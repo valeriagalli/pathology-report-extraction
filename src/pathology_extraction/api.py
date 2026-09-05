@@ -3,11 +3,13 @@ FastAPI module to expose the pathology report extraction.
 """
 
 from fastapi import FastAPI
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 
 from pathology_extraction.config import MODELS
 from pathology_extraction.extraction import build_extractor
 from pathology_extraction.schema import PathologyExtraction
+from pathology_extraction.text_processing import normalize_string
 from pathology_extraction.validation import (
     validate_field_evidence,
     validate_field_value,
@@ -48,8 +50,6 @@ def extract_report(request: ExtractionRequest):
         request.report_text,
     )
 
-    from pathology_extraction.text_processing import normalize_string
-
     raw_clean = normalize_string(request.report_text)
 
     fields = {}
@@ -70,8 +70,58 @@ def extract_report(request: ExtractionRequest):
         fields[field_name] = FieldScore(
             value=field.value,
             evidence=field.evidence,
-            value_evidence_score=value_score,
-            evidence_semantic_score=semantic_score,
+            value_evidence_score=round(value_score, 2),
+            evidence_semantic_score=round(semantic_score, 2),
         )
 
     return ExtractionResponse(fields=fields)
+
+
+@app.get("/", response_class=HTMLResponse)
+def form():
+    """Serve a minimal HTML page for manually testing the /extract endpoint."""
+    return """
+    <html>
+    <head><title>Pathology Report Extraction</title></head>
+    <body style="font-family: sans-serif; max-width: 700px; margin: 40px auto;">
+        <h2>Pathology Report Extraction</h2>
+        <p>Paste a pathology report below and click Extract.</p>
+        <textarea id="report" rows="15" style="width: 100%;"></textarea><br><br>
+        <button onclick="submitReport()">Extract</button>
+        <p id="status"></p>
+        <pre id="result" style="background: #f4f4f4; padding: 10px; white-space: pre-wrap;"></pre>
+
+        <script>
+            async function submitReport() {
+                const text = document.getElementById('report').value;
+                const status = document.getElementById('status');
+                const result = document.getElementById('result');
+
+                if (!text.trim()) {
+                    status.textContent = "Please paste some report text first.";
+                    return;
+                }
+
+                status.textContent = "Extracting... (this can take a few seconds)";
+                result.textContent = "";
+
+                try {
+                    const res = await fetch('/extract', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({report_text: text})
+                    });
+                    if (!res.ok) {
+                        throw new Error(`Request failed: ${res.status}`);
+                    }
+                    const data = await res.json();
+                    status.textContent = "Done.";
+                    result.textContent = JSON.stringify(data, null, 2);
+                } catch (err) {
+                    status.textContent = "Error: " + err.message;
+                }
+            }
+        </script>
+    </body>
+    </html>
+    """

@@ -8,3 +8,4 @@ Weights are configurable parameters, meant to be set by domain experts rather th
 - **Multi-model comparison and agreement analysis**: runs extraction through two independent models and flags fields where they disagree. More models are possible depending on availability.
 - **PDF text ingestion**: a separate utility (`pdf_ingest.py`) for extracting text from text-based PDF pathology reports, for cases where input isn't already available as clean CSV text.
 - **REST API**: a FastAPI wrapper exposing extraction and confidence scoring as a `/extract` endpoint, so the pipeline can be called by other services rather than only run as a batch script.
+- **Web interface**: a minimal HTML form at `/` for pasting report text directly and viewing extraction results in the browser, no client scripting required.
