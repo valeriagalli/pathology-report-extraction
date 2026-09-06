@@ -10,6 +10,7 @@ from pathology_extraction.config import REPORTS_FP
 
 
 def print_result(response_data: ExtractionResponse):
+    """Print the result of the API call in a readable format."""
     for field_name, field in response_data.fields.items():
         print(f"{field_name}:")
         print(f"  value: {field.value}")

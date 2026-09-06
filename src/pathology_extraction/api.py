@@ -89,7 +89,8 @@ def form():
         <textarea id="report" rows="15" style="width: 100%;"></textarea><br><br>
         <button onclick="submitReport()">Extract</button>
         <p id="status"></p>
-        <pre id="result" style="background: #f4f4f4; padding: 10px; white-space: pre-wrap;"></pre>
+        <pre id="result" style="background: #f4f4f4; padding: 10px;
+                         white-space: pre-wrap;"></pre>
 
         <script>
             async function submitReport() {
@@ -124,4 +125,5 @@ def form():
         </script>
     </body>
     </html>
+    
     """
