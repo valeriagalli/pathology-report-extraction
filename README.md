@@ -1,7 +1,7 @@
 # Pathology Report Extraction
 
 Structured field extraction from unstructured pathology reports using LLMs, with grounding-based confidence scoring to flag low-confidence extractions for human review.
-
+**[Try the live demo →](https://pathology-extraction-api-128233380109.europe-west6.run.app)**
 
 ## Installation (Windows)
 

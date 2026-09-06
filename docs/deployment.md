@@ -129,5 +129,9 @@ command that sets the secret.
 Creating a secret does not automatically let any particular service read it. Grant
 access explicitly with `gcloud secrets add-iam-policy-binding`, as shown above.
 
-## Status
-Deployment currently fails at container startup on Cloud Run, root cause not yet identified (works correctly when run locally, including with the real secret).
+
+> **Status**: deployed and working. The original buildpacks-based deploy failed
+> silently at container startup, root cause found via local Docker debugging:
+> `sentence-transformers`'s model loading needed more than the default 512Mi
+> memory allocation. Switching to an explicit Dockerfile (for full control and
+> local reproducibility) plus `--memory 1Gi` resolved it.

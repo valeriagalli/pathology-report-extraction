@@ -6,7 +6,7 @@
 - [x] Extraction schema
 - [x] LLM extraction agent (direct Groq API)
 - [x] Validation and human-in-the-loop review
-- [x] End-to-end pipeline over TCGA-Reports datasetgit li
+- [x] End-to-end pipeline over TCGA-Reports dataset
 
 ### v0.2 — Multi-model extraction
 - [x] Multi-model extraction support
@@ -15,7 +15,8 @@
 - [x] Integrate model agreement into review workflow
 - [x] Partial unit test coverage
 
-### v0.3 — Packaging and deployment (planned)
+### v0.3 — Packaging and deployment
 - [x] Restructure to src/ layout with pyproject.toml
-- [ ] FastAPI wrapper exposing extraction + confidence as an endpoint
-- [ ] Deploy to Cloud Run or AWS Lambda
+- [x] FastAPI wrapper exposing extraction + confidence as an endpoint
+- [x] Deploy to Cloud Run 
+- [ ] GitHub Actions CI running the test suite on push
