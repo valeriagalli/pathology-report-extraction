@@ -1,6 +1,7 @@
 # Pathology Report Extraction
 
 Structured field extraction from unstructured pathology reports using LLMs, with grounding-based confidence scoring to flag low-confidence extractions for human review.
+
 **[Try the live demo →](https://pathology-extraction-api-128233380109.europe-west6.run.app)**
 
 ## Installation (Windows)
@@ -69,6 +70,7 @@ uvicorn pathology_extraction.api:app --reload
 ```
 
 The endpoint returns extracted fields (diagnosis, tumor site, grade, stage, margins) each paired with a confidence score based on evidence grounding and value/evidence consistency.
+
 Note this uses a single model (no cross-model agreement), since agreement requires comparing multiple models' output, which isn't meaningful for a single synchronous request.
 
 **Try it in your browser**: visit `http://127.0.0.1:8000/` for a simple web form, paste report text directly and see results, no manual JSON escaping needed.
@@ -80,26 +82,35 @@ python examples/call_api.py
 ```
 This pulls a random report from `dataset/TCGA_Reports.csv`, useful for quickly testing without needing your own report text on hand.
 
-**Explore the API schema**: visit `http://127.0.0.1:8000/docs` for the full interactive API reference. Note: testing `/extract` with real, multi-line report text directly through the `/docs` UI requires manually escaping newlines in the pasted JSON; the web form at `/` or `examples/call_api.py` are better suited for that.
+**Explore the API schema**: visit `http://127.0.0.1:8000/docs` for the full interactive API reference. 
+
+Note: testing `/extract` with real, multi-line report text directly through the `/docs` UI requires manually escaping newlines in the pasted JSON; the web form at `/` or `examples/call_api.py` are better suited for that.
 
 ## Features
 
-- **Structured extraction**: pulls predefined fields from unstructured pathology report text using an LLM (Groq API), with each field paired with a verbatim source quote as evidence.
-- **Grounding-based confidence, not self-reported**: each extraction is checked for whether its cited evidence actually appears in the source report, and whether the extracted value is consistent with its own evidence.
-- **Composite confidence score**: combines grounding, value/evidence consistency, and cross-model agreement into one weighted score per field. 
-- **Human-in-the-loop review queues**: a report-level sorted list of extractions that need reviewing and a field-level detail view.
-- **Multi-model comparison and agreement analysis**: runs extraction through multiple models and flags fields where they disagree.
-- **PDF text ingestion**: a standalone utility for extracting text from text-based PDF pathology reports, for input not already available as clean text.
-- **REST API**: a FastAPI wrapper exposing extraction and confidence scoring as a `/extract` endpoint.
+- **Structured extraction**: pulls diagnosis, tumor site, grade, stage, and margin status from unstructured pathology reports using an LLM, each field paired with a source quote as evidence.
+- **Grounding-based confidence**: verifies extracted evidence actually appears in the source report and that values are consistent with their evidence.
+- **Composite confidence score**: combines grounding, value/evidence consistency, and cross-model agreement into one weighted score per field.
+- **Human-in-the-loop review queues**: report-level and field-level views flagging extractions that need review.
+- **Multi-model comparison**: runs extraction through multiple models and flags fields where they disagree.
+- **PDF text ingestion**: extracts text from text-based PDF reports.
+- **REST API**: a FastAPI endpoint exposing extraction and confidence scoring.
+- **Web interface**: a minimal form for testing extraction directly in the browser.
+
+See [docs/architecture.md](docs/architecture.md) for the reasoning behind these design choices.
 
 
 ## Project structure
 ```text
 pathology-report-extraction/
+├── .github/
+│   └── workflows/
+│       └── quality-checks.yml
 ├── dataset/
 ├── docs/
-│   └── limitations.md
-│   ├── roadmap.md
+│   ├── architecture.md
+│   ├── limitations.md
+│   └── roadmap.md
 ├── results/
 ├── src/
 │   └── pathology_extraction/
@@ -121,17 +132,21 @@ pathology-report-extraction/
 │   ├── test_api.py
 │   ├── test_review.py
 │   └── test_validation.py
+├── .dockerignore
 ├── .gitignore
+├── dockerfile
+├── Procfile
 ├── pyproject.toml
 └── README.md
 ```
 
 
 ## Status
-Core validation, scoring, and API logic covered by unit tests; orchestration and LLM-calling code intentionally untested.
+Core validation, scoring, and API logic covered by unit tests; orchestration and LLM-calling code remain untested.
 
 
 ## Documentation
 
+- [Architecture](docs/architecture.md)
 - [Limitations and design tradeoffs](docs/limitations.md)
 - [Project roadmap](docs/roadmap.md)

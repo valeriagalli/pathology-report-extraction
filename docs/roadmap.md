@@ -19,4 +19,11 @@
 - [x] Restructure to src/ layout with pyproject.toml
 - [x] FastAPI wrapper exposing extraction + confidence as an endpoint
 - [x] Deploy to Cloud Run 
-- [ ] GitHub Actions CI running the test suite on push
+- [x] GitHub Actions CI running the test suite on push
+
+### Possible improvements
+- [ ] Deployment-level testing in CI (verify the live service, not just unit tests)
+- [ ] Larger, labeled validation set for confidence-threshold calibration
+- [ ] Expand unit test coverage to extraction.py (would require mocking the Groq client)
+- [ ] Custom Swagger UI or file-upload support for large report text in `/docs`
+- [ ] `docs/architecture.md` design-rationale write-up
