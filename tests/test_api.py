@@ -12,9 +12,6 @@ from pathology_extraction.config import REPORTS_FP
 client = TestClient(app)
 
 
-@pytest.mark.skipif(
-    not REPORTS_FP.exists(), reason="Requires the TCGA dataset, not available in CI"
-)
 def test_extract_endpoint_returns_200():
     """Test that the /extract endpoint returns a 200 status code
     for a valid request."""
@@ -22,6 +19,9 @@ def test_extract_endpoint_returns_200():
     assert response.status_code == 200
 
 
+@pytest.mark.skipif(
+    not REPORTS_FP.exists(), reason="Requires the TCGA dataset, not available in CI"
+)
 def test_extract_endpoint_with_real_report():
     """Test that the /extract endpoint returns a valid response
     when provided with a real report from the dataset."""
